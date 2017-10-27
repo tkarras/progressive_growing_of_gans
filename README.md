@@ -35,4 +35,4 @@ We have tested the implementation using the following system configuration:
 * NVIDIA 384.81 driver
 * Bleeding-edge version of Theano and Lasagne from Oct 17, 2017
 
-We are planning to implement TensorFlow support in the near future.
+We are planning to add TensorFlow support in the near future.
