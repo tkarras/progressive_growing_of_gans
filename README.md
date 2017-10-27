@@ -15,7 +15,7 @@
 
 ## License
 
-The source code is available under the CC BY-NC license:
+The source code is available under the [CC BY-NC](https://creativecommons.org/licenses/by-nc/4.0/legalcode) license:
 
 ```
 # Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
