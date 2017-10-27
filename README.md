@@ -7,11 +7,10 @@
 
 ## Links
 
-* [Paper (high-quality version)](https://research.nvidia.com/publication/TODO)
-* [Paper (arXiv version)](https://arxiv.org/abs/TODO)
-* [Result video](https://youtu.be/TODO)
-* [Pre-trained networks + 100,000 generated PNGs for each dataset](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
-* Datasets (not available at the moment)
+* [Paper (research.nvidia.com)](http://research.nvidia.com/publication/2017-10_Progressive-Growing-of)
+* [Video (YouTube)](https://youtu.be/XOxxPcy5Gr4)
+* [Pre-trained networks + 100,000 generated PNGs for each dataset (Google Drive)](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
+* Datasets (currently unavailable)
 
 ## License
 
