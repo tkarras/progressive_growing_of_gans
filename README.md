@@ -10,7 +10,7 @@
 * [Paper (high-quality version)](https://research.nvidia.com/publication/TODO)
 * [Paper (arXiv version)](https://arxiv.org/abs/TODO)
 * [Result video](https://youtu.be/TODO)
-* [Pre-trained networks and image dumps](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
+* [Pre-trained networks + 100,000 generated PNGs for each dataset](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
 * Datasets (not available at the moment)
 
 ## License
@@ -32,7 +32,7 @@ We have tested the implementation using the following system configuration:
 
 * NVIDIA DGX-1 with Tesla P100
 * BaseOS 2.1.0, 4.4.0-92-generic kernel
-* NVIDIA 384.81 driver
+* NVIDIA driver 384.81, CUDA Toolkit 9.0
 * Bleeding-edge version of Theano and Lasagne from Oct 17, 2017
 
 We are planning to add TensorFlow support in the near future.
