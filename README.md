@@ -2,6 +2,7 @@
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
 ![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/master/representative_image_512x256.png)
+
 Picture: Two imaginary celebrities that were dreamed up by a random number generator.
 
 *We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively, starting from low-resolution images, and add new layers that deal with higher resolution details as the training progresses. This greatly stabilizes the training and allows us to produce images of unprecedented quality, e.g., CelebA images at 1024² resolution. We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several small implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution we construct a higher quality version of the CelebA dataset that allows meaningful exploration up to the resolution of 1024² pixels.*
