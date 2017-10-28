@@ -14,7 +14,7 @@ import numpy as np
 import theano
 from theano import tensor as T
 import lasagne
-import cPickle
+from six.moves import cPickle
 
 # NOTE: Do not reference config.py here!
 # Instead, specify all network parameters as build function arguments.
@@ -184,7 +184,7 @@ class Network(object):
 
     def _call_build_func_from_src(self):
         tmp_module = imp.new_module('network_tmp_module')
-        exec self.build_module_src in tmp_module.__dict__
+        exec(self.build_module_src in tmp_module.__dict__)
         globals()['tmp_modules'] = globals().get('tmp_modules', []) + [tmp_module] # Work around issues with GC.
         return self._call_build_func(tmp_module.__dict__)
 
