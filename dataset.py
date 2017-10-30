@@ -9,7 +9,7 @@ import os
 import numpy as np
 import h5py
 import threading
-import Queue
+from six.moves import queue
 
 #----------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ class Dataset:
             self.reshuffle_window = min(self.order.size / 2, self.order.size - self.prefetch_images * 2 - 1)
         else:
             self.reshuffle_window = 1
-        self.queue = Queue.Queue(self.prefetch_images)
+        self.queue = queue.Queue(self.prefetch_images)
         self.thread = None
         self.cur_pos = 0
         self.cur_lod = -1

@@ -4,6 +4,7 @@
 # 4.0 International License. To view a copy of this license, visit
 # http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+from __future__ import print_function
 
 import os
 import sys
@@ -11,7 +12,7 @@ import glob
 import math
 import types
 import datetime
-import cPickle
+from six.moves import cPickle
 import numpy as np
 from collections import OrderedDict 
 import PIL.Image
@@ -175,7 +176,7 @@ def create_result_subdir(result_dir, run_desc):
                 continue
             raise
 
-    print "Saving results to", result_subdir
+    print("Saving results to", result_subdir)
     set_output_log_file(os.path.join(result_subdir, 'log.txt'))
 
     # Export run details.
@@ -209,8 +210,8 @@ def print_network_topology_info(layers):
     import lasagne
 
     print
-    print "%-16s%-28s%-10s%-20s%-20s%s" % ('LayerName', 'LayerType', 'Params', 'OutputShape', 'WeightShape', 'Activation')
-    print "%-16s%-28s%-10s%-20s%-20s%s" % (('---',) * 6)
+    print("%-16s%-28s%-10s%-20s%-20s%s" % ('LayerName', 'LayerType', 'Params', 'OutputShape', 'WeightShape', 'Activation'))
+    print("%-16s%-28s%-10s%-20s%-20s%s" % (('---',) * 6))
     total_params = 0
 
     for l in lasagne.layers.get_all_layers(layers):
@@ -227,10 +228,10 @@ def print_network_topology_info(layers):
                 weights = np.zeros(())
         weight_str      = shape_to_str(weights.shape)
         act_str         = '' if not hasattr(l, 'nonlinearity') else l.nonlinearity.__name__ if isinstance(l.nonlinearity, types.FunctionType) else type(l.nonlinearity).__name__
-        print "%-16s%-28s%-10d%-20s%-20s%s" % (l.name, type_str, nparams, shape_to_str(outshape), weight_str, act_str)
+        print("%-16s%-28s%-10d%-20s%-20s%s" % (l.name, type_str, nparams, shape_to_str(outshape), weight_str, act_str))
 
-    print "%-16s%-28s%-10s%-20s%-20s%s" % (('---',) * 6)
-    print "%-16s%-28s%-10d%-20s%-20s%s" % ('Total', '', total_params, '', '', '')
+    print("%-16s%-28s%-10s%-20s%-20s%s" % (('---',) * 6))
+    print("%-16s%-28s%-10d%-20s%-20s%s" % ('Total', '', total_params, '', '', ''))
     print
 
 def shape_to_str(shape):
