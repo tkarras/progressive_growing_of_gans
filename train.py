@@ -355,7 +355,7 @@ def evaluate_loss(
 #----------------------------------------------------------------------------
 # Image generation API.
 
-def imgapi_load_net(run_id, snapshot=None, random_seed=1000, num_example_latents=1000, compile_gen_fn=True):
+def imgapi_load_net(run_id, snapshot=None, random_seed=1000, num_example_latents=1000, load_dataset=True, compile_gen_fn=True):
     class Net: pass
     net = Net()
     net.result_subdir = misc.locate_result_subdir(run_id)
@@ -365,8 +365,10 @@ def imgapi_load_net(run_id, snapshot=None, random_seed=1000, num_example_latents
     # Generate example latents and labels.
     np.random.seed(random_seed)
     net.example_latents = random_latents(num_example_latents, net.G.input_shape)
-    net.training_set, net.dynamic_range = load_dataset_for_previous_run(net.result_subdir, verbose=False)
-    net.example_labels = net.training_set.labels
+    net.example_labels = np.zeros((num_example_latents, 0), dtype=np.float32)
+    net.dynamic_range = [0, 255]
+    if load_dataset:
+        imgapi_load_dataset(net)
 
     # Compile Theano func.
     net.latents_var = T.TensorType('float32', [False] * len(net.example_latents.shape))('latents_var')
@@ -384,6 +386,13 @@ def imgapi_load_net(run_id, snapshot=None, random_seed=1000, num_example_latents
         imgapi_compile_gen_fn(net)
     return net
 
+def imgapi_load_dataset(net):
+    net.training_set, net.dynamic_range = load_dataset_for_previous_run(net.result_subdir, verbose=False)
+    net.example_labels = net.training_set.labels
+    if len(net.example_labels) < len(net.example_latents):
+        reps = (len(net.example_latents) - 1) / len(net.example_labels) + 1
+        net.example_labels = np.concatenate([net.example_labels] * reps)[:len(net.example_latents)]
+
 def imgapi_compile_gen_fn(net):
     net.gen_fn = theano.function([net.latents_var, net.labels_var], net.images_expr, on_unused_input='ignore')
 
@@ -400,7 +409,7 @@ def imgapi_generate_batch(net, latents, labels, minibatch_size=16, convert_to_ui
     return images
 
 def imgapi_example(run_id, snapshot):
-    net = imgapi_load_net(run_id, snapshot)
+    net = imgapi_load_net(run_id, snapshot, load_dataset=False)
     images = net.gen_fn(net.example_latents[:1], net.example_labels[:1])
     # latents: [minibatch, component], normalized automatically by the network, value represents a point on the unit hypersphere
     # labels:  [minibatch, component], value depends on the dataset and training config
@@ -423,7 +432,7 @@ def interpolate_latents(
     import moviepy.editor # pip install moviepy
 
     # Choose parameters.
-    net = imgapi_load_net(run_id=run_id, snapshot=snapshot)
+    net = imgapi_load_net(run_id=run_id, snapshot=snapshot, load_dataset=False)
     w, h = net.G.output_shape[3], net.G.output_shape[2]
     if image_grid_size is None and zoom is None: image_grid_size = (1, 1)
     if zoom is None: zoom = max(min(1920 / w, 1080 / h), 1)
@@ -487,7 +496,7 @@ def calc_inception_scores(run_id, log='inception.txt', num_images=50000, minibat
         network_pkls = network_pkls[::-1]
     for network_idx, network_pkl in network_pkls:
         print '%-32s' % os.path.basename(network_pkl),
-        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images, random_seed=network_idx)
+        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images, random_seed=network_idx, load_dataset=False)
         fakes = imgapi_generate_batch(net, net.example_latents, np.random.permutation(labels), minibatch_size=minibatch_size, convert_to_uint8=True)
         mean, std = calc_inception_score(fakes)
         print 'mean %-8.4f std %-8.4f' % (mean, std)
@@ -567,7 +576,7 @@ def calc_sliced_wasserstein_scores(
     # Process each network snapshot.
     for network_idx, network_pkl in enumerate(network_pkls):
         print '%-32s' % os.path.basename(network_pkl),
-        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images, random_seed=network_idx)
+        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images, random_seed=network_idx, load_dataset=False)
 
         # Extract descriptors for generated images.
         desc_fake = [[] for res in resolutions]
@@ -652,7 +661,7 @@ def calc_mnistrgb_histogram(run_id, num_images=25600, log='histogram.txt', minib
     latents = None
     for network_idx, network_pkl in enumerate(network_pkls):
         print '%-32s' % os.path.basename(network_pkl),
-        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images*num_evals)
+        net = imgapi_load_net(run_id=result_subdir, snapshot=network_pkl, num_example_latents=num_images*num_evals, load_dataset=False)
         fakes = imgapi_generate_batch(net, net.example_latents, labels, minibatch_size=minibatch_size, convert_to_uint8=True)
         mean, kld = calc_histogram(fakes)
         print 'mean %-8.4f kld %-8.4f' % (mean, kld)
