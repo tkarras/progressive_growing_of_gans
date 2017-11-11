@@ -16,7 +16,30 @@
 * [Result video (YouTube)](https://youtu.be/XOxxPcy5Gr4)
 * [One hour of imaginary celebrities (YouTube)](https://youtu.be/36lE9tV9vm0)
 * [Pre-trained networks (Google Drive)](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
-* Datasets (currently unavailable)
+
+## Datasets
+
+The repository contains a command-line tool for recreating bit-exact replicas of the HDF5 datasets that we used in the paper. The tool also provides various utilities for operating on HDF5 files:
+
+```
+usage: h5tool.py [-h] <command> ...
+
+    inspect             Print information about HDF5 dataset.
+    compare             Compare two HDF5 datasets.
+    display             Display images in HDF5 dataset.
+    extract             Extract images from HDF5 dataset.
+    create_custom       Create HDF5 dataset for custom images.
+    create_mnist        Create HDF5 dataset for MNIST.
+    create_mnist_rgb    Create HDF5 dataset for MNIST-RGB.
+    create_cifar10      Create HDF5 dataset for CIFAR-10.
+    create_lsun         Create HDF5 dataset for single LSUN category.
+    create_celeba       Create HDF5 dataset for CelebA.
+    create_celeba_hq    Create HDF5 dataset for CelebA-HQ.
+
+Type "h5tool.py <command> -h" for more information.
+```
+
+The ```create_*``` commands take the original dataset as input and produce the corresponding HDF5 file as output. Additionally, the ```create_celeba_hq``` command requires a set of data files representing deltas from the original CelebA dataset. The deltas can be downloaded from [Google Drive (27.6GB)](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
 
 ## License
 
@@ -40,5 +63,7 @@ We have tested the implementation on the following system:
 * NVIDIA driver 384.81, CUDA Toolkit 9.0
 * Python 2.7.11
 * Bleeding-edge version of Theano and Lasagne from Oct 17, 2017
+* numpy 1.13.1, scipy 0.19.1, pillow 3.1.1, h5py 2.7.0
+* moviepy 0.2.3.2, cryptography 2.0.3, opencv 2.4.11, lmdb 0.92
 
 We are planning to add support for TensorFlow and multi-GPU in the near future.
