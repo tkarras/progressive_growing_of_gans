@@ -98,12 +98,12 @@ loss = dict(                                # Loss function:
 #----------------------------------------------------------------------------
 # Configuration overrides for individual experiments.
 
-# Section 6.3: "High-resolution image generation using CelebA-HQ"
+# Section 6.3: "High-resolution image generation using CelebA-HQ dataset"
 if 1:
     run_desc = 'celeb-hq-1024x1024'
-    dataset = dict(h5_path='celeb-hq-1024x1024.h5', resolution=1024, max_labels=0, mirror_augment=True, max_images=30000)
+    dataset = dict(h5_path='celeba-hq-1024x1024.h5', resolution=1024, max_labels=0, mirror_augment=True, max_images=30000)
 
-# Section 6.4.1: "LSUN categories"
+# Section 6.4: "LSUN results"
 if 0:
     categories = ['airplane', 'bedroom', 'bicycle', 'bird', 'boat', 'bottle', 'bridge', 'bus', 'car', 'cat',
                   'chair', 'churchoutdoor', 'classroom', 'conferenceroom', 'cow', 'diningroom', 'diningtable', 'dog', 'horse', 'kitchen',
@@ -113,7 +113,7 @@ if 0:
     name = categories[category_idx]
     if name == 'bedroom' or name == 'dog':
         run_desc = 'lsun-%s-256x256' % name
-        h5_path = 'lsun-%s-256x256.h5' % name
+        h5_path = 'lsun-%s-256x256-full.h5' % name
         mirror_augment = False
     else:
         run_desc = 'lsun-%s-256x256-100k' % name
@@ -125,7 +125,7 @@ if 0:
     G.update(fmap_base=4096)
     D.update(fmap_base=4096)
 
-# Section 6.1: "Image quality with standard datasets"
+# Section 6.1: "Importance of individual contributions in terms of statistical similarity"
 if 0:
     datasets = ['celeb128', 'bedroom128']
     configs = ['gulrajani-et-al-2017', 'progressive-growing', 'small-minibatch', 'revised-training-parameters',
@@ -134,7 +134,7 @@ if 0:
     config_idx = 0
 
     run_desc = '%s-%s' % (datasets[dataset_idx], configs[config_idx])
-    h5_paths = {'celeb128': 'celeb-128x128.h5', 'bedroom128': 'lsun-bedroom-256x256.h5'}
+    h5_paths = {'celeb128': 'celeba-128x128.h5', 'bedroom128': 'lsun-bedroom-256x256.h5'}
     dataset = dict(h5_path=h5_paths[datasets[dataset_idx]], max_labels=0, resolution=128, mirror_augment=True)
 
     train.update(lod_training_kimg=800, lod_transition_kimg=800, rampup_kimg=0, total_kimg=10000, minibatch_overrides={})
@@ -167,7 +167,7 @@ if 0:
     if config_idx < 7: # without pixelwise-normalization
         G.update(use_pixelnorm=False)
 
-# Section 6.4.2: "CIFAR10 inception scores"
+# Section 6.5: "CIFAR10 inception scores"
 if 0:
     run_desc = 'cifar-10-32x32'
     dataset = dict(h5_path='cifar-10-32x32.h5', resolution=32, max_labels=0, mirror_augment=False)
