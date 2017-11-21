@@ -473,7 +473,7 @@ def create_celeba_hq(h5_filename, celeba_dir, delta_dir, num_threads=4, num_task
     with open(os.path.join(celeba_dir, 'Anno', 'list_landmarks_celeba.txt'), 'rt') as file:
         landmarks = [[float(value) for value in line.split()[1:]] for line in file.readlines()[2:]]
         landmarks = np.float32(landmarks).reshape(-1, 5, 2)
-        
+    
     print 'Loading CelebA-HQ deltas from %s' % delta_dir
     import hashlib
     import bz2
@@ -494,6 +494,19 @@ def create_celeba_hq(h5_filename, celeba_dir, delta_dir, num_threads=4, num_task
         for idx, field in enumerate(lines[0]):
             type = int if field.endswith('idx') else str
             fields[field] = [type(line[idx]) for line in lines[1:]]
+
+    # Check Pillow version.
+    if PIL.__dict__.get('PILLOW_VERSION', '') != '3.1.1':
+        print 'Error: create_celeba_hq requires Pillow 3.1.1'
+        return
+        
+    # Check libjpeg version.
+    img = np.array(PIL.Image.open(os.path.join(celeba_dir, 'img_celeba', '000001.jpg')))
+    md5 = hashlib.md5()
+    md5.update(img.tobytes())
+    if md5.hexdigest() != '9cad8178d6cb0196b36f7b34bc5eb6d3':
+        print 'Error: create_celeba_hq requires libjpeg8d'
+        return
 
     def rot90(v):
         return np.array([-v[1], v[0]])

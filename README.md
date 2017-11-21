@@ -63,7 +63,8 @@ We have tested the implementation on the following system:
 * NVIDIA driver 384.81, CUDA Toolkit 9.0
 * Python 2.7.11
 * Bleeding-edge version of Theano and Lasagne from Oct 17, 2017
-* numpy 1.13.1, scipy 0.19.1, pillow 3.1.1, h5py 2.7.0
+* pillow 3.1.1, libjpeg8d
+* numpy 1.13.1, scipy 0.19.1, h5py 2.7.0
 * moviepy 0.2.3.2, cryptography 2.0.3, opencv 2.4.11, lmdb 0.92
 
 We are planning to add support for TensorFlow and multi-GPU in the near future.
