@@ -134,8 +134,9 @@ if 0:
     config_idx = 0
 
     run_desc = '%s-%s' % (datasets[dataset_idx], configs[config_idx])
-    h5_paths = {'celeb128': 'celeba-128x128.h5', 'bedroom128': 'lsun-bedroom-256x256.h5'}
-    dataset = dict(h5_path=h5_paths[datasets[dataset_idx]], max_labels=0, resolution=128, mirror_augment=True)
+    h5_paths = {'celeb128': 'celeba-128x128.h5', 'bedroom128': 'lsun-bedroom-256x256-full.h5'}
+    mirror_augment = {'celeb128': True, 'bedroom128': False}
+    dataset = dict(h5_path=h5_paths[datasets[dataset_idx]], max_labels=0, resolution=128, mirror_augment=mirror_augment[datasets[dataset_idx]])
 
     train.update(lod_training_kimg=800, lod_transition_kimg=800, rampup_kimg=0, total_kimg=10000, minibatch_overrides={})
     G.update(fmap_base=2048)
@@ -172,8 +173,9 @@ if 0:
     run_desc = 'cifar-10-32x32'
     dataset = dict(h5_path='cifar-10-32x32.h5', resolution=32, max_labels=0, mirror_augment=False)
     train.update(lod_training_kimg=400, lod_transition_kimg=400, rampup_kimg=0, minibatch_overrides={})
-    G.update(fmap_base=4096)
-    D.update(fmap_base=4096)
+    train.update(total_kimg=20000, separate_funcs=False)
+    G.update(fmap_base=4096, fmap_max=128, latent_size=128)
+    D.update(fmap_base=4096, fmap_max=128)
     loss.update(iwass_target=750.0)
 
 # Appendix E: "MNIST-1K discrete mode test with crippled discriminator"
@@ -189,13 +191,13 @@ if 0:
     run_desc = 'mnistrgb32-k%d-wgangp%s-seed%d' % (K, config_postfix, random_seed)
     dataset = dict(h5_path='mnist-rgb-32x32.h5', resolution=32, max_labels=0, mirror_augment=False)
     train.update(D_training_repeats=5, minibatch_default=64, minibatch_overrides={})
-    train.update(lod_initial_resolution=4, lod_training_kimg=400, lod_transition_kimg=400, total_kimg=10000)
-    G = dict(func='G_mnist_mode_recovery', fmap_base=64, fmap_decay=1.0, fmap_max=256)
-    D = dict(func='D_mnist_mode_recovery', fmap_base=64, fmap_decay=1.0, fmap_max=256, X=K)
+    train.update(lod_initial_resolution=4, lod_training_kimg=500, lod_transition_kimg=2000, total_kimg=15000)
+    G = dict(func='G_mnist_mode_recovery', fmap_base=64, fmap_decay=1.0, fmap_max=256, progressive=True)
+    D = dict(func='D_mnist_mode_recovery', fmap_base=64, fmap_decay=1.0, fmap_max=256, progressive=True, X=K)
     loss = dict(type='iwass', iwass_epsilon=0.0)
 
     if not useProg:
-        train.update(lod_initial_resolution=32, lod_training_kimg=0, lod_transition_kimg=0)
+        train.update(lod_initial_resolution=32, lod_training_kimg=0, lod_transition_kimg=0, total_kimg=10000)
         G.update(progressive=False)
         D.update(progressive=False)
 
