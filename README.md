@@ -1,5 +1,4 @@
 ## Progressive Growing of GANs for Improved Quality, Stability, and Variation
-**Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
 ![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/master/representative_image_512x256.png)
 <br>
@@ -63,7 +62,7 @@ We have tested the implementation on the following system:
 * NVIDIA driver 384.81, CUDA Toolkit 9.0
 * Python 2.7.11
 * Bleeding-edge version of Theano and Lasagne from Oct 17, 2017
-* pillow 3.1.1, libjpeg8d
+* Pillow 3.1.1, libjpeg8d
 * numpy 1.13.1, scipy 0.19.1, h5py 2.7.0
 * moviepy 0.2.3.2, cryptography 2.0.3, opencv 2.4.11, lmdb 0.92
 
