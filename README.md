@@ -1,4 +1,5 @@
 ## Progressive Growing of GANs for Improved Quality, Stability, and Variation
+**Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
 ![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/master/representative_image_512x256.png)
 <br>
