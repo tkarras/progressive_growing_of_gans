@@ -1,3 +1,5 @@
+<span style="color:red">**Note about versions:**</span> This branch contains the original Theano-based implementation that we used to produce the results in our paper. Unless you are looking to reproduce the exact same set of experiments, we strongly suggest checking out our [new TensorFlow-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/master) instead.
+
 ## Progressive Growing of GANs for Improved Quality, Stability, and Variation
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
@@ -13,8 +15,7 @@
 
 * [Paper (NVIDIA research)](http://research.nvidia.com/publication/2017-10_Progressive-Growing-of)
 * [Paper (arXiv)](http://arxiv.org/abs/1710.10196)
-* [Result video (YouTube)](https://youtu.be/XOxxPcy5Gr4)
-* [One hour of imaginary celebrities (YouTube)](https://youtu.be/36lE9tV9vm0)
+* [Result video (YouTube)](https://youtu.be/G06dEcZ-QTg)
 * [Pre-trained networks (Google Drive)](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
 
 ## Datasets
@@ -66,5 +67,3 @@ We have tested the implementation on the following system:
 * Pillow 3.1.1, libjpeg8d
 * numpy 1.13.1, scipy 0.19.1, h5py 2.7.0
 * moviepy 0.2.3.2, cryptography 2.0.3, opencv 2.4.11, lmdb 0.92
-
-We are planning to add support for TensorFlow and multi-GPU in the near future.
