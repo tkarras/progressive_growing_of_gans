@@ -1,4 +1,4 @@
-<span style="color:red">**Note about versions:**</span> This branch contains the original Theano-based implementation that we used to produce the results in our paper. Unless you are looking to reproduce the exact same set of experiments, we strongly suggest checking out our [new TensorFlow-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/master) instead.
+**Note about versions:** This branch contains the **original Theano-based implementation** that we used to produce the results in our paper. Unless you are looking to reproduce the exact same set of experiments, we strongly suggest checking out our [new TensorFlow-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/master) instead.
 
 ## Progressive Growing of GANs for Improved Quality, Stability, and Variation
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
