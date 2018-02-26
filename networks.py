@@ -128,7 +128,7 @@ def conv2d_downscale2d(x, fmaps, kernel, gain=np.sqrt(2), use_wscale=False):
 
 def pixel_norm(x):
     with tf.variable_scope('PixelNorm'):
-        return x * tf.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keep_dims=True) + 1e-8)
+        return x / tf.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keep_dims=True) + 1e-8)
 
 #----------------------------------------------------------------------------
 # Minibatch standard deviation.
