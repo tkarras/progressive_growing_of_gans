@@ -18,6 +18,6 @@
 
 ## Note about versions
 
-We are in the process of setting up a new TensorFlow-based implementation in this branch. The code is not in a fully usable state yet -- please check back in a few days.
+We are in the process of setting up a new TensorFlow-based implementation in this branch. The code is not in a fully usable state yet -- please check back in a few days. The current ETA is March 2.
 
 In the meantime, please refer to the [original Theano-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/original-theano-version).
