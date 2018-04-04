@@ -102,6 +102,7 @@ loss = dict(                                # Loss function:
 if 1:
     run_desc = 'celeb-hq-1024x1024'
     dataset = dict(h5_path='celeba-hq-1024x1024.h5', resolution=1024, max_labels=0, mirror_augment=True, max_images=30000)
+    train.update(lod_training_kimg=800, lod_transition_kimg=800, total_kimg=19000)
 
 # Section 6.4: "LSUN results"
 if 0:
@@ -122,8 +123,6 @@ if 0:
         
     dataset = dict(h5_path=h5_path, resolution=256, max_labels=0, mirror_augment=mirror_augment)
     train.update(lod_training_kimg=800, lod_transition_kimg=800, total_kimg=20000, minibatch_overrides={})
-    G.update(fmap_base=4096)
-    D.update(fmap_base=4096)
 
 # Section 6.1: "Importance of individual contributions in terms of statistical similarity"
 if 0:
