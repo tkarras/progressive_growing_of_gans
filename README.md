@@ -66,7 +66,7 @@ with open('karras2018iclr-celebahq-1024x1024.pkl', 'rb') as file:
     G, D, Gs = pickle.load(file)
     # G = Instantaneous snapshot of the generator, mainly useful for resuming a previous training run.
     # D = Instantaneous snapshot of the discriminator, mainly useful for resuming a previous training run.
-    # Gs = Long-term average of the generator network, yielding higher-quality results than the instantaneous snapshot.
+    # Gs = Long-term average of the generator, yielding higher-quality results than the instantaneous snapshot.
 ```
 
 It is also possible to import networks that were produced using the Theano implementation, as long as they do not employ any features that are not natively supported by the TensorFlow version (minibatch discrimination, batch normalization, etc.). To enable Theano network import, however, you must use `misc.load_pkl()` in place of `pickle.load()`:
@@ -124,7 +124,7 @@ drwxrwxr-x 10 user user        62 Apr  3 15:10 ..
 -rw-r--r--  1 user user   2000080 Feb 19 13:17 cifar10-rxx.labels
 ```
 
-The ```create_*``` commands take the standard version of a given dataset as input and produce the corresponding `*.tfrecords` files as output. Additionally, the ```create_celeba_hq``` command requires a set of data files representing deltas with respect to the original CelebA dataset. These deltas (27.6GB) can be downloaded from [`datasets/celeba-hq-deltas`](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
+The ```create_*``` commands take the standard version of a given dataset as input and produce the corresponding `*.tfrecords` files as output. Additionally, the ```create_celebahq``` command requires a set of data files representing deltas with respect to the original CelebA dataset. These deltas (27.6GB) can be downloaded from [`datasets/celeba-hq-deltas`](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
 
 **Note about module versions**: Some of the dataset commands require specific versions of Python modules and system libraries (e.g. pillow, libjpeg), and they will give an error if the versions do not match. Please heed the error messages – there is **no way** to get the commands to work other than installing these specific versions.
 
@@ -152,6 +152,7 @@ Other noteworthy config options:
 * `fp16`: Enable [FP16 mixed-precision training](http://docs.nvidia.com/deeplearning/sdk/mixed-precision-training/index.html) to reduce the training times even further. The actual speedup is heavily dependent on GPU architecture and cuDNN version, and it can be expected to increase considerably in the future.
 * `BENCHMARK`: Quickly iterate through the resolutions to measure the raw training performance.
 * `BENCHMARK0`: Same as `BENCHMARK`, but only use the highest resolution.
+* `syn1024rgb`: Synthetic 1024x1024 dataset consisting of just black images. Useful for benchmarking.
 * `VERBOSE`: Save image and network snapshots very frequently to facilitate debugging.
 * `GRAPH` and `HIST`: Include additional data in the TensorBoard report.
 
