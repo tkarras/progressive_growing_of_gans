@@ -77,7 +77,10 @@ def _get_inception_layer(sess):
                   new_shape.append(None)
                 else:
                   new_shape.append(s)
-              o._shape = tf.TensorShape(new_shape)
+              try:
+                o._shape = tf.TensorShape(new_shape)
+              except ValueError:
+                o._shape_val = tf.TensorShape(new_shape) # EDIT: added for compatibility with tensorflow 1.6.0
     return pool3
 #-------------------------------------------------------------------------------
 

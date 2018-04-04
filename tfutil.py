@@ -46,11 +46,6 @@ def lerp_clip(a, b, t):
     with tf.name_scope('LerpClip'):
         return a + (b - a) * tf.clip_by_value(t, 0.0, 1.0)
 
-def group_return(*args): # Same as tf.group(), but returns the value of the last argument.
-    with tf.name_scope('GroupReturn'):
-        with tf.control_dependencies(args[:-1]):
-            return tf.identity(args[-1])
-
 def absolute_name_scope(scope): # Forcefully enter the specified name scope, ignoring any surrounding scopes.
     return tf.name_scope(scope + '/')
 
@@ -59,8 +54,6 @@ def absolute_name_scope(scope): # Forcefully enter the specified name scope, ign
 
 def init_tf(config_dict=dict()):
     if tf.get_default_session() is None:
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(config_dict.pop('env.TF_CPP_MIN_LOG_LEVEL', 1)) # 1 = disable debug prints, 0 = print everything
-        os.environ['CUDA_LAUNCH_BLOCKING'] = str(config_dict.pop('env.CUDA_LAUNCH_BLOCKING', 0)) # 1 = synchronize after each cuda kernel launch, 0 = asynchronous operation
         tf.set_random_seed(np.random.randint(1 << 31))
         create_session(config_dict, force_as_default=True)
 
@@ -140,60 +133,64 @@ def set_vars(var_to_value_dict):
 #   is added to the average immediately.
 
 _autosummary_vars = OrderedDict() # name => [var, ...]
-_autosummary_finalized = OrderedDict() # name => [var, ...]
+_autosummary_immediate = OrderedDict() # name => update_op, update_value
+_autosummary_finalized = False
 
 def autosummary(name, value):
     id = name.replace('/', '_')
-    if not name in _autosummary_vars:
-        _autosummary_vars[name] = []
-
-    # Value is TensorFlow expression => create accumulator and ops to update it.
     if is_tf_expression(value):
-        assert name not in _autosummary_finalized
-        with tf.name_scope(id + '_summary'), tf.device(value.device):
-            with tf.control_dependencies(None):
-                var = tf.Variable(np.float32([0.0, 0.0])) # [numerator, denominator]
-                _autosummary_vars[name].append(var)
-            tmp = tf.cast(value, tf.float32)
-            if tmp.shape.ndims is 0:
-                inc = [tmp, np.float32(1.0)]
-            elif tmp.shape.ndims is 1:
-                inc = [tf.reduce_sum(tmp), tf.cast(tf.shape(tmp)[0], tf.float32)]
-            else:
-                inc = [tf.reduce_sum(tmp), tf.reduce_prod(tf.cast(tf.shape(tmp), tf.float32))]
-            return tf.cond(tf.is_finite(inc[0]),
-                lambda: group_return(tf.assign_add(var, tf.stack(inc)), value),
-                lambda: value)
-
-    # Python scalar or numpy array => grab the first accumulator and update it immediately.
-    else:
-        if not _autosummary_vars[name]:
-            assert name not in _autosummary_finalized
+        with tf.name_scope('summary_' + id), tf.device(value.device):
+            update_op = _create_autosummary_var(name, value)
+            with tf.control_dependencies([update_op]):
+                return tf.identity(value)
+    else: # python scalar or numpy array
+        if name not in _autosummary_immediate:
             with absolute_name_scope('Autosummary/' + id), tf.device(None), tf.control_dependencies(None):
-                _autosummary_vars[name].append(tf.Variable(np.float32([0.0, 0.0])))
-        var = _autosummary_vars[name][0]
-        tmp = np.float32(value)
-        inc = [np.sum(tmp), np.float32(tmp.size)]
-        if np.isfinite(inc[0]):
-            init_uninited_vars([var])
-            set_vars({var: var.eval() + inc})
+                update_value = tf.placeholder(tf.float32)
+                update_op = _create_autosummary_var(name, update_value)
+                _autosummary_immediate[name] = update_op, update_value
+        update_op, update_value = _autosummary_immediate[name]
+        run(update_op, {update_value: np.float32(value)})
         return value
 
 # Create the necessary ops to include autosummaries in TensorBoard report.
 # Note: This should be done only once per graph.
 def finalize_autosummaries():
-    for name, vars in _autosummary_vars.items():
-        if name not in _autosummary_finalized:
-            _autosummary_finalized[name] = vars
-            with tf.device(None), tf.control_dependencies(None):
-                id = name.replace('/', '_')
-                with absolute_name_scope('Autosummary/' + id):
-                    sum = tf.add_n(vars)
-                    avg = sum[0] / sum[1]
-                    with tf.control_dependencies([avg]): # read before resetting
-                        reset_ops = [tf.assign(var, np.float32([0.0, 0.0])) for var in vars]
-                        with tf.name_scope(None), tf.control_dependencies(reset_ops): # reset before reporting
-                            tf.summary.scalar(name, avg)
+    global _autosummary_finalized
+    if _autosummary_finalized:
+        return
+    _autosummary_finalized = True
+    init_uninited_vars([var for vars in _autosummary_vars.values() for var in vars])
+    with tf.device(None), tf.control_dependencies(None):
+        for name, vars in _autosummary_vars.items():
+            id = name.replace('/', '_')
+            with absolute_name_scope('Autosummary/' + id):
+                sum = tf.add_n(vars)
+                avg = sum[0] / sum[1]
+                with tf.control_dependencies([avg]): # read before resetting
+                    reset_ops = [tf.assign(var, tf.zeros(2)) for var in vars]
+                    with tf.name_scope(None), tf.control_dependencies(reset_ops): # reset before reporting
+                        tf.summary.scalar(name, avg)
+
+# Internal helper for creating autosummary accumulators.
+def _create_autosummary_var(name, value_expr):
+    assert not _autosummary_finalized
+    v = tf.cast(value_expr, tf.float32)
+    if v.shape.ndims is 0:
+        v = [v, np.float32(1.0)]
+    elif v.shape.ndims is 1:
+        v = [tf.reduce_sum(v), tf.cast(tf.shape(v)[0], tf.float32)]
+    else:
+        v = [tf.reduce_sum(v), tf.reduce_prod(tf.cast(tf.shape(v), tf.float32))]
+    v = tf.cond(tf.is_finite(v[0]), lambda: tf.stack(v), lambda: tf.zeros(2))
+    with tf.control_dependencies(None):
+        var = tf.Variable(tf.zeros(2)) # [numerator, denominator]
+    update_op = tf.cond(tf.is_variable_initialized(var), lambda: tf.assign_add(var, v), lambda: tf.assign(var, v))
+    if name in _autosummary_vars:
+        _autosummary_vars[name].append(var)
+    else:
+        _autosummary_vars[name] = [var]
+    return update_op
 
 #----------------------------------------------------------------------------
 # Call filewriter.add_summary() with all summaries in the default graph,
@@ -220,7 +217,7 @@ def import_module(module_or_obj_name):
             module = importlib.import_module('.'.join(parts[:i]))
             relative_obj_name = '.'.join(parts[i:])
             return module, relative_obj_name
-        except:
+        except ImportError:
             pass
     raise ImportError(module_or_obj_name)
 
@@ -233,6 +230,10 @@ def find_obj_in_module(module, relative_obj_name):
 def import_obj(obj_name):
     module, relative_obj_name = import_module(obj_name)
     return find_obj_in_module(module, relative_obj_name)
+
+def call_func_by_name(*args, func=None, **kwargs):
+    assert func is not None
+    return import_obj(func)(*args, **kwargs)
 
 #----------------------------------------------------------------------------
 # Wrapper for tf.train.Optimizer that automatically takes care of:
@@ -269,34 +270,40 @@ class Optimizer:
         self._dev_opt           = OrderedDict() # device => optimizer
         self._dev_grads         = OrderedDict() # device => [[(grad, var), ...], ...]
         self._dev_ls_var        = OrderedDict() # device => variable (log2 of loss scaling factor)
+        self._updates_applied   = False
 
     # Register the gradients of the given loss function with respect to the given variables.
     # Intended to be called once per GPU.
     def register_gradients(self, loss, vars):
+        assert not self._updates_applied
+
         # Validate arguments.
         if isinstance(vars, dict):
             vars = list(vars.values()) # allow passing in Network.trainables as vars
         assert isinstance(vars, list) and len(vars) >= 1
         assert all(is_tf_expression(expr) for expr in vars + [loss])
         if self._grad_shapes is None:
-            self._grad_shapes = [var.shape for var in vars]
+            self._grad_shapes = [shape_to_list(var.shape) for var in vars]
         assert len(vars) == len(self._grad_shapes)
-        assert all(var.shape == var_shape for var, var_shape in zip(vars, self._grad_shapes))
+        assert all(shape_to_list(var.shape) == var_shape for var, var_shape in zip(vars, self._grad_shapes))
         dev = loss.device
         assert all(var.device == dev for var in vars)
 
         # Register device and compute gradients.
         with tf.name_scope(self.id + '_grad'), tf.device(dev):
             if dev not in self._dev_opt:
-                self._dev_opt[dev] = self.optimizer_class(learning_rate=self.learning_rate, **self.optimizer_kwargs)
+                opt_name = self.scope.replace('/', '_') + '_opt%d' % len(self._dev_opt)
+                self._dev_opt[dev] = self.optimizer_class(name=opt_name, learning_rate=self.learning_rate, **self.optimizer_kwargs)
                 self._dev_grads[dev] = []
             loss = self.apply_loss_scaling(tf.cast(loss, tf.float32))
             grads = self._dev_opt[dev].compute_gradients(loss, vars, gate_gradients=tf.train.Optimizer.GATE_NONE) # disable gating to reduce memory usage
             grads = [(g, v) if g is not None else (tf.zeros_like(v), v) for g, v in grads] # replace disconnected gradients with zeros
             self._dev_grads[dev].append(grads)
 
-    # Construct training op to updates the registered variables based on their gradients.
+    # Construct training op to update the registered variables based on their gradients.
     def apply_updates(self):
+        assert not self._updates_applied
+        self._updates_applied = True
         devices = list(self._dev_grads.keys())
         total_grads = sum(len(grads) for grads in self._dev_grads.values())
         assert len(devices) >= 1 and total_grads >= 1
@@ -318,9 +325,10 @@ class Optimizer:
             # Sum gradients across devices.
             if len(devices) > 1:
                 with tf.name_scope('SumAcrossGPUs'), tf.device(None):
-                    for var_idx in range(len(self._grad_shapes)):
+                    for var_idx, grad_shape in enumerate(self._grad_shapes):
                         g = [dev_grads[dev][var_idx][0] for dev in devices]
-                        g = tf.contrib.nccl.all_sum(g)
+                        if np.prod(grad_shape): # nccl does not support zero-sized tensors
+                            g = tf.contrib.nccl.all_sum(g)
                         for dev, gg in zip(devices, g):
                             dev_grads[dev][var_idx] = (gg, dev_grads[dev][var_idx][1])
 
@@ -358,8 +366,14 @@ class Optimizer:
                             if self.use_loss_scaling:
                                 ops.append(autosummary(self.id + '/loss_scaling_log2', ls_var))
 
-            # Group everything into a single op.
+            # Initialize variables and group everything into a single op.
+            self.reset_optimizer_state()
+            init_uninited_vars(list(self._dev_ls_var.values()))
             return tf.group(*ops, name='TrainingOp')
+
+    # Reset internal state of the underlying optimizer.
+    def reset_optimizer_state(self):
+        run([var.initializer for opt in self._dev_opt.values() for var in opt.variables()])
 
     # Get or create variable representing log2 of the current dynamic loss scaling factor.
     def get_loss_scaling_var(self, device):
@@ -582,6 +596,12 @@ class Network:
         assert isinstance(src_net, Network)
         name_to_value = run({name: src_net.find_var(name) for name in self.trainables.keys()})
         set_vars({self.find_var(name): value for name, value in name_to_value.items()})
+
+    # Create new network with the given parameters, and copy all variables from this network.
+    def convert(self, name=None, func=None, **static_kwargs):
+        net = Network(name, func, **static_kwargs)
+        net.copy_vars_from(self)
+        return net
 
     # Construct a TensorFlow op that updates the variables of this network
     # to be slightly closer to those of the given network.

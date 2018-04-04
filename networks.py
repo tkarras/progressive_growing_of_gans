@@ -56,7 +56,7 @@ def apply_bias(x):
     if len(x.shape) == 2:
         return x + b
     else:
-        return tf.nn.bias_add(x, b, data_format='NCHW')
+        return x + tf.reshape(b, [1, -1, 1, 1])
 
 #----------------------------------------------------------------------------
 # Leaky ReLU activation. Same as tf.nn.leaky_relu, but supports FP16.
@@ -103,15 +103,6 @@ def downscale2d(x, factor=2):
         return tf.nn.avg_pool(x, ksize=ksize, strides=ksize, padding='VALID', data_format='NCHW') # NOTE: requires tf_config['graph_options.place_pruned_graph'] = True
 
 #----------------------------------------------------------------------------
-# Downscaling layer with no filtering.
-
-def downscale2d_stride(x, factor=2):
-    assert isinstance(factor, int) and factor >= 1
-    if factor == 1: return x
-    with tf.variable_scope('Downscale2D_stride'):
-        return x[:, :, ::factor, ::factor]
-
-#----------------------------------------------------------------------------
 # Fused conv2d + downscale2d.
 # Faster and uses less memory than performing the operations separately.
 
@@ -126,9 +117,9 @@ def conv2d_downscale2d(x, fmaps, kernel, gain=np.sqrt(2), use_wscale=False):
 #----------------------------------------------------------------------------
 # Pixelwise feature vector normalization.
 
-def pixel_norm(x):
+def pixel_norm(x, epsilon=1e-8):
     with tf.variable_scope('PixelNorm'):
-        return x * tf.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keep_dims=True) + 1e-8)
+        return x * tf.rsqrt(tf.reduce_mean(tf.square(x), axis=1, keepdims=True) + epsilon)
 
 #----------------------------------------------------------------------------
 # Minibatch standard deviation.
@@ -137,12 +128,12 @@ def minibatch_stddev_layer(x, group_size=4):
     with tf.variable_scope('MinibatchStddev'):
         group_size = tf.minimum(group_size, tf.shape(x)[0])     # Minibatch must be divisible by (or smaller than) group_size.
         s = x.shape                                             # [NCHW]  Input shape.
-        y = tf.reshape(x, [group_size, -1, s[1], s[2], s[3]])   # [GMCHW] Split minibatch into groups of size M=N/G.
+        y = tf.reshape(x, [group_size, -1, s[1], s[2], s[3]])   # [GMCHW] Split minibatch into M groups of size G.
         y = tf.cast(y, tf.float32)                              # [GMCHW] Cast to FP32.
-        y -= tf.reduce_mean(y, axis=0, keep_dims=True)          # [GMCHW] Subtract mean over group.
+        y -= tf.reduce_mean(y, axis=0, keepdims=True)           # [GMCHW] Subtract mean over group.
         y = tf.reduce_mean(tf.square(y), axis=0)                # [MCHW]  Calc variance over group.
         y = tf.sqrt(y + 1e-8)                                   # [MCHW]  Calc stddev over group.
-        y = tf.reduce_mean(y, axis=[1,2,3], keep_dims=True)     # [M111]  Take average over fmaps and pixels.
+        y = tf.reduce_mean(y, axis=[1,2,3], keepdims=True)      # [M111]  Take average over fmaps and pixels.
         y = tf.cast(y, x.dtype)                                 # [M111]  Cast back to original data type.
         y = tf.tile(y, [group_size, 1, s[2], s[3]])             # [N1HW]  Replicate over group and pixels.
         return tf.concat([x, y], axis=1)                        # [NCHW]  Append as new fmap.
@@ -163,6 +154,7 @@ def G_paper(
     normalize_latents   = True,         # Normalize latent vectors before feeding them to the network?
     use_wscale          = True,         # Enable equalized learning rate?
     use_pixelnorm       = True,         # Enable pixelwise feature vector normalization?
+    pixelnorm_epsilon   = 1e-8,         # Constant epsilon for pixelwise feature vector normalization.
     use_leakyrelu       = True,         # True = leaky ReLU, False = ReLU.
     dtype               = 'float32',    # Data type to use for activations and outputs.
     fused_scale         = True,         # True = use fused upscale2d + conv2d, False = separate upscale2d layers.
@@ -173,7 +165,7 @@ def G_paper(
     resolution_log2 = int(np.log2(resolution))
     assert resolution == 2**resolution_log2 and resolution >= 4
     def nf(stage): return min(int(fmap_base / (2.0 ** (stage * fmap_decay))), fmap_max)
-    def PN(x): return pixel_norm(x) if use_pixelnorm else x
+    def PN(x): return pixel_norm(x, epsilon=pixelnorm_epsilon) if use_pixelnorm else x
     if latent_size is None: latent_size = nf(0)
     if structure is None: structure = 'linear' if is_template_graph else 'recursive'
     act = leaky_relu if use_leakyrelu else tf.nn.relu
@@ -187,9 +179,9 @@ def G_paper(
     def block(x, res): # res = 2..resolution_log2
         with tf.variable_scope('%dx%d' % (2**res, 2**res)):
             if res == 2: # 4x4
-                if normalize_latents: x = pixel_norm(x)
+                if normalize_latents: x = pixel_norm(x, epsilon=pixelnorm_epsilon)
                 with tf.variable_scope('Dense'):
-                    x = dense(x, fmaps=nf(res-1)*16, use_wscale=use_wscale)
+                    x = dense(x, fmaps=nf(res-1)*16, gain=np.sqrt(2)/4, use_wscale=use_wscale) # override gain to match the original Theano implementation
                     x = tf.reshape(x, [-1, nf(res-1), 4, 4])
                     x = PN(act(apply_bias(x)))
                 with tf.variable_scope('Conv'):
@@ -308,10 +300,10 @@ def D_paper(
     # Recursive structure: complex but efficient.
     if structure == 'recursive':
         def grow(res, lod):
-            x = lambda: fromrgb(downscale2d_stride(images_in, 2**lod), res)
+            x = lambda: fromrgb(downscale2d(images_in, 2**lod), res)
             if lod > 0: x = cset(x, (lod_in < lod), lambda: grow(res + 1, lod - 1))
             x = block(x(), res); y = lambda: x
-            if res > 2: y = cset(y, (lod_in > lod), lambda: lerp(x, fromrgb(downscale2d(downscale2d_stride(images_in, 2**lod)), res - 1), lod_in - lod))
+            if res > 2: y = cset(y, (lod_in > lod), lambda: lerp(x, fromrgb(downscale2d(images_in, 2**(lod+1)), res - 1), lod_in - lod))
             return y()
         combo_out = grow(2, resolution_log2 - 2)
 

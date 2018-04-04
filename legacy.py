@@ -54,6 +54,7 @@ def patch_theano_gan(state):
     spec.pop(       'use_gdrop',        True)       # doesn't make a difference
     assert spec.pop('use_layernorm',    False)      == False
     spec[           'fused_scale']                  = False
+    spec[           'mbstd_group_size']             = 16
 
     vars = []
     param_iter = iter(state['param_values'])
@@ -64,7 +65,7 @@ def patch_theano_gan(state):
     def layer(name, gain, w): return [(name + '/weight', wscale(gain, w)), (name + '/bias', next(param_iter))]
     
     if func.startswith('G'):
-        vars += layer('4x4/Dense', relu, flatten2(next(param_iter).transpose(1,0,2,3)))
+        vars += layer('4x4/Dense', relu/4, flatten2(next(param_iter).transpose(1,0,2,3)))
         vars += layer('4x4/Conv', relu, next(param_iter).transpose(2,3,1,0)[::-1,::-1])
         for res in range(3, resolution_log2 + 1):
             vars += layer('%dx%d/Conv0' % (2**res, 2**res), relu, next(param_iter).transpose(2,3,1,0)[::-1,::-1])

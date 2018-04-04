@@ -38,9 +38,9 @@ class TFRecordDataset:
         label_file      = None,     # Relative path of the labels file, None = autodetect.
         max_label_size  = 0,        # 0 = no labels, 'full' = full labels, <int> = N first label components.
         repeat          = True,     # Repeat dataset indefinitely.
-        shuffle_items   = 512,      # Shuffle data items within the specified window, 0 = disable.
-        prefetch_items  = 512,      # Number of data items to prefetch, 0 = disable.
-        buffer_bytes    = 256<<20,  # Read buffer size in bytes.
+        shuffle_mb      = 4096,     # Shuffle data within specified window (megabytes), 0 = disable shuffling.
+        prefetch_mb     = 2048,     # Amount of data to prefetch (megabytes), 0 = disable prefetching.
+        buffer_mb       = 256,      # Read buffer size (megabytes).
         num_threads     = 2):       # Number of concurrent threads.
 
         self.tfrecord_dir       = tfrecord_dir
@@ -105,22 +105,29 @@ class TFRecordDataset:
             self._np_labels = self._np_labels[:, :max_label_size]
         self.label_size = self._np_labels.shape[1]
         self.label_dtype = self._np_labels.dtype.name
-        
+
         # Build TF expressions.
-        with tf.name_scope('Dataset'):
+        with tf.name_scope('Dataset'), tf.device('/cpu:0'):
             self._tf_minibatch_in = tf.placeholder(tf.int64, name='minibatch_in', shape=[])
-            self._tf_labels_var = tf.Variable(self._np_labels, name='labels_var')
+            tf_labels_init = tf.zeros(self._np_labels.shape, self._np_labels.dtype)
+            self._tf_labels_var = tf.Variable(tf_labels_init, name='labels_var')
+            tfutil.set_vars({self._tf_labels_var: self._np_labels})
             self._tf_labels_dataset = tf.data.Dataset.from_tensor_slices(self._tf_labels_var)
-            for tfr_file, tfr_lod in zip(tfr_files, tfr_lods):
-                if tfr_lod >= 0:
-                    dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_bytes)
-                    dset = dset.map(parse_tfrecord_tf, num_parallel_calls=num_threads)
-                    if prefetch_items: dset = dset.prefetch(prefetch_items)
-                    dset = tf.data.Dataset.zip((dset, self._tf_labels_dataset))
-                    if repeat: dset = dset.repeat()
-                    if shuffle_items: dset = dset.shuffle(shuffle_items)
-                    dset = dset.batch(self._tf_minibatch_in)
-                    self._tf_datasets[tfr_lod] = dset
+            for tfr_file, tfr_shape, tfr_lod in zip(tfr_files, tfr_shapes, tfr_lods):
+                if tfr_lod < 0:
+                    continue
+                dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb<<20)
+                dset = dset.map(parse_tfrecord_tf, num_parallel_calls=num_threads)
+                dset = tf.data.Dataset.zip((dset, self._tf_labels_dataset))
+                bytes_per_item = np.prod(tfr_shape) * np.dtype(self.dtype).itemsize
+                if shuffle_mb > 0:
+                    dset = dset.shuffle(((shuffle_mb << 20) - 1) // bytes_per_item + 1)
+                if repeat:
+                    dset = dset.repeat()
+                if prefetch_mb > 0:
+                    dset = dset.prefetch(((prefetch_mb << 20) - 1) // bytes_per_item + 1)
+                dset = dset.batch(self._tf_minibatch_in)
+                self._tf_datasets[tfr_lod] = dset
             self._tf_iterator = tf.data.Iterator.from_structure(self._tf_datasets[0].output_types, self._tf_datasets[0].output_shapes)
             self._tf_init_ops = {lod: self._tf_iterator.make_initializer(dset) for lod, dset in self._tf_datasets.items()}
 

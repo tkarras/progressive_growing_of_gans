@@ -138,7 +138,7 @@ def set_output_log_file(filename, mode='wt'):
 #----------------------------------------------------------------------------
 # Reporting results.
 
-def create_result_subdir(result_dir, run_desc):
+def create_result_subdir(result_dir, desc):
 
     # Select run ID and create subdir.
     while True:
@@ -151,7 +151,7 @@ def create_result_subdir(result_dir, run_desc):
             except ValueError:
                 pass
 
-        result_subdir = os.path.join(result_dir, '%03d-%s' % (run_id, run_desc))
+        result_subdir = os.path.join(result_dir, '%03d-%s' % (run_id, desc))
         try:
             os.makedirs(result_subdir)
             break
@@ -198,7 +198,8 @@ def locate_result_subdir(run_id_or_result_subdir):
         dir = os.path.join(dir, str(run_id_or_result_subdir))
         if os.path.isdir(dir):
             return dir
-        dirs = glob.glob(os.path.join(config.result_dir, searchdir, '%s-*' % str(run_id_or_result_subdir)))
+        prefix = '%03d' % run_id_or_result_subdir if isinstance(run_id_or_result_subdir, int) else str(run_id_or_result_subdir)
+        dirs = sorted(glob.glob(os.path.join(config.result_dir, searchdir, prefix + '-*')))
         dirs = [dir for dir in dirs if os.path.isdir(dir)]
         if len(dirs) == 1:
             return dirs[0]

@@ -6,149 +6,135 @@
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 #----------------------------------------------------------------------------
+# Convenience class that behaves exactly like dict(), but allows accessing
+# the keys and values using the attribute syntax, i.e., "mydict.key = value".
+
+class EasyDict(dict):
+    def __init__(self, *args, **kwargs): super().__init__(*args, **kwargs)
+    def __getattr__(self, name): return self[name]
+    def __setattr__(self, name, value): self[name] = value
+    def __delattr__(self, name): del self[name]
+
+#----------------------------------------------------------------------------
 # Paths.
 
 data_dir = 'datasets'
 result_dir = 'results'
 
 #----------------------------------------------------------------------------
-# Baseline training config.
-# Comment/uncomment the lines as appropriate and launch train.py.
+# TensorFlow options.
 
-if 1:
-    run_desc    = 'pgan'                                        # Description string included in result subdir name.
-    random_seed = 1001                                          # Global random seed for NumPy.
-    tf_config   = {'graph_options.place_pruned_graph': True}    # Options for tfutil.init_tf().
-    dataset     = dict()                                        # Options for dataset.load_dataset().
-    train       = dict(func='train.train_progressive_gan')      # Options for the main training func.
-    G           = dict(func='networks.G_paper')                 # Options for the generator network.
-    D           = dict(func='networks.D_paper')                 # Options for the discriminator network.
-    G_opt       = dict(beta1=0.0, beta2=0.99, epsilon=1e-8)     # Options for tfutil.Optimizer('TrainG').
-    D_opt       = dict(beta1=0.0, beta2=0.99, epsilon=1e-8)     # Options for tfutil.Optimizer('TrainD').
-    loss        = dict(type='wgan-gp', cond_type='acgan')       # Options for train.training_loss().
-    schedule    = dict()                                        # Options for train.training_schedule().
-    grid        = dict(size='1080p', layout='random')           # Options for train.setup_snapshot_image_grid().
+tf_config = EasyDict()  # TensorFlow session config, set by tfutil.init_tf().
+env = EasyDict()        # Environment variables, set by the main program in train.py.
 
-    # Dataset selection.
+tf_config['graph_options.place_pruned_graph']   = True      # False (default) = Check that all ops are available on the designated device. True = Skip the check for ops that are not used.
+#tf_config['gpu_options.allow_growth']          = False     # False (default) = Allocate all GPU memory at the beginning. True = Allocate only as much GPU memory as needed.
+#env.CUDA_VISIBLE_DEVICES                       = '0'       # Unspecified (default) = Use all available GPUs. List of ints = CUDA device numbers to use.
+env.TF_CPP_MIN_LOG_LEVEL                        = '1'       # 0 (default) = Print all available debug info from TensorFlow. 1 = Print warnings and errors, but disable debug info.
 
-    run_desc += '-celebahq';   dataset = dict(tfrecord_dir='celebahq'); train.update(mirror_augment=True)
-    #run_desc += '-celeba';     dataset = dict(tfrecord_dir='celeba'); train.update(mirror_augment=True)
-    #run_desc += '-cifar10';    dataset = dict(tfrecord_dir='cifar10')
-    #run_desc += '-cifar100';   dataset = dict(tfrecord_dir='cifar100')
-    #run_desc += '-svhn';       dataset = dict(tfrecord_dir='svhn')
-    #run_desc += '-mnist';      dataset = dict(tfrecord_dir='mnist')
-    #run_desc += '-mnistrgb';   dataset = dict(tfrecord_dir='mnistrgb')
-    #run_desc += '-syn1024rgb'; dataset = dict(class_name='dataset.SyntheticDataset', resolution=1024, num_channels=3)
+#----------------------------------------------------------------------------
+# Official training configs, targeted mainly for CelebA-HQ.
+# To run, comment/uncomment the lines as appropriate and launch train.py.
 
-    #run_desc += '-lsun-airplane';       dataset = dict(tfrecord_dir='lsun-airplane-100k');       train.update(mirror_augment=True)
-    #run_desc += '-lsun-bedroom';        dataset = dict(tfrecord_dir='lsun-bedroom-100k');        train.update(mirror_augment=True)
-    #run_desc += '-lsun-bicycle';        dataset = dict(tfrecord_dir='lsun-bicycle-100k');        train.update(mirror_augment=True)
-    #run_desc += '-lsun-bird';           dataset = dict(tfrecord_dir='lsun-bird-100k');           train.update(mirror_augment=True)
-    #run_desc += '-lsun-boat';           dataset = dict(tfrecord_dir='lsun-boat-100k');           train.update(mirror_augment=True)
-    #run_desc += '-lsun-bottle';         dataset = dict(tfrecord_dir='lsun-bottle-100k');         train.update(mirror_augment=True)
-    #run_desc += '-lsun-bridge';         dataset = dict(tfrecord_dir='lsun-bridge-100k');         train.update(mirror_augment=True)
-    #run_desc += '-lsun-bus';            dataset = dict(tfrecord_dir='lsun-bus-100k');            train.update(mirror_augment=True)
-    #run_desc += '-lsun-car';            dataset = dict(tfrecord_dir='lsun-car-100k');            train.update(mirror_augment=True)
-    #run_desc += '-lsun-cat';            dataset = dict(tfrecord_dir='lsun-cat-100k');            train.update(mirror_augment=True)
-    #run_desc += '-lsun-chair';          dataset = dict(tfrecord_dir='lsun-chair-100k');          train.update(mirror_augment=True)
-    #run_desc += '-lsun-churchoutdoor';  dataset = dict(tfrecord_dir='lsun-churchoutdoor-100k');  train.update(mirror_augment=True)
-    #run_desc += '-lsun-classroom';      dataset = dict(tfrecord_dir='lsun-classroom-100k');      train.update(mirror_augment=True)
-    #run_desc += '-lsun-conferenceroom'; dataset = dict(tfrecord_dir='lsun-conferenceroom-100k'); train.update(mirror_augment=True)
-    #run_desc += '-lsun-cow';            dataset = dict(tfrecord_dir='lsun-cow-100k');            train.update(mirror_augment=True)
-    #run_desc += '-lsun-diningroom';     dataset = dict(tfrecord_dir='lsun-diningroom-100k');     train.update(mirror_augment=True)
-    #run_desc += '-lsun-diningtable';    dataset = dict(tfrecord_dir='lsun-diningtable-100k');    train.update(mirror_augment=True)
-    #run_desc += '-lsun-dog';            dataset = dict(tfrecord_dir='lsun-dog-100k');            train.update(mirror_augment=True)
-    #run_desc += '-lsun-horse';          dataset = dict(tfrecord_dir='lsun-horse-100k');          train.update(mirror_augment=True)
-    #run_desc += '-lsun-kitchen';        dataset = dict(tfrecord_dir='lsun-kitchen-100k');        train.update(mirror_augment=True)
-    #run_desc += '-lsun-livingroom';     dataset = dict(tfrecord_dir='lsun-livingroom-100k');     train.update(mirror_augment=True)
-    #run_desc += '-lsun-motorbike';      dataset = dict(tfrecord_dir='lsun-motorbike-100k');      train.update(mirror_augment=True)
-    #run_desc += '-lsun-person';         dataset = dict(tfrecord_dir='lsun-person-100k');         train.update(mirror_augment=True)
-    #run_desc += '-lsun-pottedplant';    dataset = dict(tfrecord_dir='lsun-pottedplant-100k');    train.update(mirror_augment=True)
-    #run_desc += '-lsun-restaurant';     dataset = dict(tfrecord_dir='lsun-restaurant-100k');     train.update(mirror_augment=True)
-    #run_desc += '-lsun-sheep';          dataset = dict(tfrecord_dir='lsun-sheep-100k');          train.update(mirror_augment=True)
-    #run_desc += '-lsun-sofa';           dataset = dict(tfrecord_dir='lsun-sofa-100k');           train.update(mirror_augment=True)
-    #run_desc += '-lsun-tower';          dataset = dict(tfrecord_dir='lsun-tower-100k');          train.update(mirror_augment=True)
-    #run_desc += '-lsun-train';          dataset = dict(tfrecord_dir='lsun-train-100k');          train.update(mirror_augment=True)
-    #run_desc += '-lsun-tvmonitor';      dataset = dict(tfrecord_dir='lsun-tvmonitor-100k');      train.update(mirror_augment=True)
+desc        = 'pgan'                                        # Description string included in result subdir name.
+random_seed = 1000                                          # Global random seed.
+dataset     = EasyDict()                                    # Options for dataset.load_dataset().
+train       = EasyDict(func='train.train_progressive_gan')  # Options for main training func.
+G           = EasyDict(func='networks.G_paper')             # Options for generator network.
+D           = EasyDict(func='networks.D_paper')             # Options for discriminator network.
+G_opt       = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8) # Options for generator optimizer.
+D_opt       = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8) # Options for discriminator optimizer.
+G_loss      = EasyDict(func='loss.G_wgan_acgan')            # Options for generator loss.
+D_loss      = EasyDict(func='loss.D_wgangp_acgan')          # Options for discriminator loss.
+sched       = EasyDict()                                    # Options for train.TrainingSchedule.
+grid        = EasyDict(size='1080p', layout='random')       # Options for train.setup_snapshot_image_grid().
 
-    # Conditioning.
+# Dataset (choose one).
+desc += '-celebahq';            dataset = EasyDict(tfrecord_dir='celebahq'); train.mirror_augment = True
+#desc += '-celeba';              dataset = EasyDict(tfrecord_dir='celeba'); train.mirror_augment = True
+#desc += '-cifar10';             dataset = EasyDict(tfrecord_dir='cifar10')
+#desc += '-cifar100';            dataset = EasyDict(tfrecord_dir='cifar100')
+#desc += '-svhn';                dataset = EasyDict(tfrecord_dir='svhn')
+#desc += '-mnist';               dataset = EasyDict(tfrecord_dir='mnist')
+#desc += '-mnistrgb';            dataset = EasyDict(tfrecord_dir='mnistrgb')
+#desc += '-syn1024rgb';          dataset = EasyDict(class_name='dataset.SyntheticDataset', resolution=1024, num_channels=3)
+#desc += '-lsun-airplane';       dataset = EasyDict(tfrecord_dir='lsun-airplane-100k');       train.mirror_augment = True
+#desc += '-lsun-bedroom';        dataset = EasyDict(tfrecord_dir='lsun-bedroom-100k');        train.mirror_augment = True
+#desc += '-lsun-bicycle';        dataset = EasyDict(tfrecord_dir='lsun-bicycle-100k');        train.mirror_augment = True
+#desc += '-lsun-bird';           dataset = EasyDict(tfrecord_dir='lsun-bird-100k');           train.mirror_augment = True
+#desc += '-lsun-boat';           dataset = EasyDict(tfrecord_dir='lsun-boat-100k');           train.mirror_augment = True
+#desc += '-lsun-bottle';         dataset = EasyDict(tfrecord_dir='lsun-bottle-100k');         train.mirror_augment = True
+#desc += '-lsun-bridge';         dataset = EasyDict(tfrecord_dir='lsun-bridge-100k');         train.mirror_augment = True
+#desc += '-lsun-bus';            dataset = EasyDict(tfrecord_dir='lsun-bus-100k');            train.mirror_augment = True
+#desc += '-lsun-car';            dataset = EasyDict(tfrecord_dir='lsun-car-100k');            train.mirror_augment = True
+#desc += '-lsun-cat';            dataset = EasyDict(tfrecord_dir='lsun-cat-100k');            train.mirror_augment = True
+#desc += '-lsun-chair';          dataset = EasyDict(tfrecord_dir='lsun-chair-100k');          train.mirror_augment = True
+#desc += '-lsun-churchoutdoor';  dataset = EasyDict(tfrecord_dir='lsun-churchoutdoor-100k');  train.mirror_augment = True
+#desc += '-lsun-classroom';      dataset = EasyDict(tfrecord_dir='lsun-classroom-100k');      train.mirror_augment = True
+#desc += '-lsun-conferenceroom'; dataset = EasyDict(tfrecord_dir='lsun-conferenceroom-100k'); train.mirror_augment = True
+#desc += '-lsun-cow';            dataset = EasyDict(tfrecord_dir='lsun-cow-100k');            train.mirror_augment = True
+#desc += '-lsun-diningroom';     dataset = EasyDict(tfrecord_dir='lsun-diningroom-100k');     train.mirror_augment = True
+#desc += '-lsun-diningtable';    dataset = EasyDict(tfrecord_dir='lsun-diningtable-100k');    train.mirror_augment = True
+#desc += '-lsun-dog';            dataset = EasyDict(tfrecord_dir='lsun-dog-100k');            train.mirror_augment = True
+#desc += '-lsun-horse';          dataset = EasyDict(tfrecord_dir='lsun-horse-100k');          train.mirror_augment = True
+#desc += '-lsun-kitchen';        dataset = EasyDict(tfrecord_dir='lsun-kitchen-100k');        train.mirror_augment = True
+#desc += '-lsun-livingroom';     dataset = EasyDict(tfrecord_dir='lsun-livingroom-100k');     train.mirror_augment = True
+#desc += '-lsun-motorbike';      dataset = EasyDict(tfrecord_dir='lsun-motorbike-100k');      train.mirror_augment = True
+#desc += '-lsun-person';         dataset = EasyDict(tfrecord_dir='lsun-person-100k');         train.mirror_augment = True
+#desc += '-lsun-pottedplant';    dataset = EasyDict(tfrecord_dir='lsun-pottedplant-100k');    train.mirror_augment = True
+#desc += '-lsun-restaurant';     dataset = EasyDict(tfrecord_dir='lsun-restaurant-100k');     train.mirror_augment = True
+#desc += '-lsun-sheep';          dataset = EasyDict(tfrecord_dir='lsun-sheep-100k');          train.mirror_augment = True
+#desc += '-lsun-sofa';           dataset = EasyDict(tfrecord_dir='lsun-sofa-100k');           train.mirror_augment = True
+#desc += '-lsun-tower';          dataset = EasyDict(tfrecord_dir='lsun-tower-100k');          train.mirror_augment = True
+#desc += '-lsun-train';          dataset = EasyDict(tfrecord_dir='lsun-train-100k');          train.mirror_augment = True
+#desc += '-lsun-tvmonitor';      dataset = EasyDict(tfrecord_dir='lsun-tvmonitor-100k');      train.mirror_augment = True
 
-    #run_desc += '-cond'; dataset.update(max_label_size='full') # conditional on full label
-    #run_desc += '-cond1'; dataset.update(max_label_size=1) # conditional on first component of the label
-    #run_desc += '-g4k'; grid.update(size='4k')
-    #run_desc += '-grpc'; grid.update(layout='row_per_class')
+# Conditioning & snapshot options.
+#desc += '-cond'; dataset.max_label_size = 'full' # conditioned on full label
+#desc += '-cond1'; dataset.max_label_size = 1 # conditioned on first component of the label
+#desc += '-g4k'; grid.size = '4k'
+#desc += '-grpc'; grid.layout = 'row_per_class'
 
-    # Numerical precision & memory usage.
+# Config presets (choose one).
+#desc += '-preset-v1-1gpu'; num_gpus = 1; D.mbstd_group_size = 16; sched.minibatch_base = 16; sched.minibatch_dict = {256: 14, 512: 6, 1024: 3}; sched.lod_training_kimg = 800; sched.lod_transition_kimg = 800; train.total_kimg = 19000
+desc += '-preset-v2-1gpu'; num_gpus = 1; sched.minibatch_base = 4; sched.minibatch_dict = {4: 128, 8: 128, 16: 128, 32: 64, 64: 32, 128: 16, 256: 8, 512: 4}; sched.G_lrate_dict = {1024: 0.0015}; sched.D_lrate_dict = EasyDict(sched.G_lrate_dict); train.total_kimg = 12000
+#desc += '-preset-v2-2gpus'; num_gpus = 2; sched.minibatch_base = 8; sched.minibatch_dict = {4: 256, 8: 256, 16: 128, 32: 64, 64: 32, 128: 16, 256: 8}; sched.G_lrate_dict = {512: 0.0015, 1024: 0.002}; sched.D_lrate_dict = EasyDict(sched.G_lrate_dict); train.total_kimg = 12000
+#desc += '-preset-v2-4gpus'; num_gpus = 4; sched.minibatch_base = 16; sched.minibatch_dict = {4: 512, 8: 256, 16: 128, 32: 64, 64: 32, 128: 16}; sched.G_lrate_dict = {256: 0.0015, 512: 0.002, 1024: 0.003}; sched.D_lrate_dict = EasyDict(sched.G_lrate_dict); train.total_kimg = 12000
+#desc += '-preset-v2-8gpus'; num_gpus = 8; sched.minibatch_base = 32; sched.minibatch_dict = {4: 512, 8: 256, 16: 128, 32: 64, 64: 32}; sched.G_lrate_dict = {128: 0.0015, 256: 0.002, 512: 0.003, 1024: 0.003}; sched.D_lrate_dict = EasyDict(sched.G_lrate_dict); train.total_kimg = 12000
 
-    #run_desc += '-fp32'; train.update(minibatch_limits={8:208, 16:132, 32:88, 64:48, 128:32, 256:16, 512:8, 1024:4})
-    run_desc += '-fp16'; G.update(dtype='float16'); D.update(dtype='float16'); G_opt.update(use_loss_scaling=True); D_opt.update(use_loss_scaling=True); train.update(minibatch_limits={8:240, 16:240, 32:156, 64:100, 128:56, 256:32, 512:16, 1024:8})
+# Numerical precision (choose one).
+desc += '-fp32'; sched.max_minibatch_per_gpu = {256: 16, 512: 8, 1024: 4}
+#desc += '-fp16'; G.dtype = 'float16'; D.dtype = 'float16'; G.pixelnorm_epsilon=1e-4; G_opt.use_loss_scaling = True; D_opt.use_loss_scaling = True; sched.max_minibatch_per_gpu = {512: 16, 1024: 8}
 
-    # Individual parameters.
+# Disable individual features.
+#desc += '-nogrowing'; sched.lod_initial_resolution = 1024; sched.lod_training_kimg = 0; sched.lod_transition_kimg = 0; train.total_kimg = 10000
+#desc += '-nopixelnorm'; G.use_pixelnorm = False
+#desc += '-nowscale'; G.use_wscale = False; D.use_wscale = False
+#desc += '-noleakyrelu'; G.use_leakyrelu = False
+#desc += '-nosmoothing'; train.G_smoothing = 0.0
+#desc += '-norepeat'; train.minibatch_repeats = 1
+#desc += '-noreset'; train.reset_opt_for_new_lod = False
 
-    #run_desc += '-mb16'; train.update(minibatch_default=16, G_smoothing=0.999**1)
-    #run_desc += '-mb32'; train.update(minibatch_default=32, G_smoothing=0.999**2)
-    run_desc += '-mb64'; train.update(minibatch_default=64, G_smoothing=0.999**4) # default
-    #run_desc += '-mb128'; train.update(minibatch_default=128, G_smoothing=0.999**8)
-    #run_desc += '-mb256'; train.update(minibatch_default=256, G_smoothing=0.999**16)
-
-    run_desc += '-lod4-600'; schedule.update(lod_initial_resolution=4, lod_training_kimg=600, lod_transition_kimg=600); train.update(total_kimg=15000) # default
-    #run_desc += '-lod4-800'; schedule.update(lod_initial_resolution=4, lod_training_kimg=800, lod_transition_kimg=800); train.update(total_kimg=20000)
-
-    #run_desc += '-lr0.0001'; schedule.update(G_learning_rate_max=0.0001, D_learning_rate_max=0.0001)
-    #run_desc += '-lr0.0002'; schedule.update(G_learning_rate_max=0.0002, D_learning_rate_max=0.0002)
-    #run_desc += '-lr0.0005'; schedule.update(G_learning_rate_max=0.0005, D_learning_rate_max=0.0005)
-    #run_desc += '-lr0.001'; schedule.update(G_learning_rate_max=0.001, D_learning_rate_max=0.001) # default
-    #run_desc += '-lr0.002'; schedule.update(G_learning_rate_max=0.002, D_learning_rate_max=0.002)
-    #run_desc += '-lr0.005'; schedule.update(G_learning_rate_max=0.005, D_learning_rate_max=0.005)
-    #run_desc += '-lr0.01'; schedule.update(G_learning_rate_max=0.01, D_learning_rate_max=0.01)
-
-    #run_desc += '-ramp10'; schedule.update(rampup_kimg=10)
-    #run_desc += '-ramp40'; schedule.update(rampup_kimg=40) # default
-    #run_desc += '-ramp100'; schedule.update(rampup_kimg=100)
-    #run_desc += '-ramp200'; schedule.update(rampup_kimg=200)
-
-    #run_desc += '-condw0.01'; loss.update(cond_weight=0.01)
-    #run_desc += '-condw0.1'; loss.update(cond_weight=0.1)
-    #run_desc += '-condw1'; loss.update(cond_weight=1.0) # default
-    #run_desc += '-condw10'; loss.update(cond_weight=10.0)
-    #run_desc += '-condw100'; loss.update(cond_weight=100.0)
-
-    # Disable individual features.
-
-    #run_desc += '-noprogression'; schedule.update(lod_initial_resolution=1024, lod_training_kimg=0, lod_transition_kimg=0); train.update(total_kimg=10000)
-    #run_desc += '-nombstd'; D.update(mbstd_group_size=0)
-    #run_desc += '-nopixelnorm'; G.update(use_pixelnorm=False)
-    #run_desc += '-nowscale-lr0.0001'; G.update(use_wscale=False); D.update(use_wscale=False); schedule.update(G_learning_rate_max=0.0001, D_learning_rate_max=0.0001)
-    #run_desc += '-noleakyrelu'; G.update(use_leakyrelu=False)
-    #run_desc += '-nosmoothing'; train.update(G_smoothing=0.0)
-
-    # Special modes.
-
-    #run_desc += '-resume'; train.update(resume_run_id=100); schedule.update(lod_initial_resolution=1024)
-    #run_desc += '-SPEEDTEST'; schedule.update(lod_initial_resolution=4, lod_training_kimg=3, lod_transition_kimg=3); train.update(total_kimg=(8*2+1)*3, tick_kimg_default=1, tick_kimg_overrides={}, image_snapshot_ticks=1000, network_snapshot_ticks=1000)
-    #run_desc += '-SPEEDTEST0'; schedule.update(lod_initial_resolution=1024); train.update(total_kimg=10, tick_kimg_default=1, tick_kimg_overrides={}, image_snapshot_ticks=1000, network_snapshot_ticks=1000)
-    #run_desc += '-VERBOSE'; train.update(tick_kimg_default=1, tick_kimg_overrides={}, image_snapshot_ticks=1, network_snapshot_ticks=100)
+# Special modes.
+#desc += '-BENCHMARK'; sched.lod_initial_resolution = 4; sched.lod_training_kimg = 3; sched.lod_transition_kimg = 3; train.total_kimg = (8*2+1)*3; sched.tick_kimg_base = 1; sched.tick_kimg_dict = {}; train.image_snapshot_ticks = 1000; train.network_snapshot_ticks = 1000
+#desc += '-BENCHMARK0'; sched.lod_initial_resolution = 1024; train.total_kimg = 10; sched.tick_kimg_base = 1; sched.tick_kimg_dict = {}; train.image_snapshot_ticks = 1000; train.network_snapshot_ticks = 1000
+#desc += '-VERBOSE'; sched.tick_kimg_base = 1; sched.tick_kimg_dict = {}; train.image_snapshot_ticks = 1; train.network_snapshot_ticks = 100
+#desc += '-GRAPH'; train.save_tf_graph = True
+#desc += '-HIST'; train.save_weight_histograms = True
 
 #----------------------------------------------------------------------------
 # Utility scripts.
 # To run, uncomment the appropriate line and launch train.py.
 
-#train = dict(func='scripts.generate_fake_images', run_id=100, num_pngs=1000); run_desc = 'fake-images-' + str(train['run_id'])
-#train = dict(func='scripts.generate_fake_images', run_id=100, grid_size=[15,8], num_pngs=10, image_shrink=4); run_desc = 'fake-grids-' + str(train['run_id'])
-#train = dict(func='scripts.generate_interpolation_video', run_id=100, grid_size=[1,1], duration_sec=60.0, smoothing_sec=1.0); run_desc = 'interpolation-video-' + str(train['run_id'])
-#train = dict(func='scripts.generate_training_video', run_id=100, duration_sec=20.0); run_desc = 'training-video-' + str(train['run_id'])
+#train = EasyDict(func='util_scripts.generate_fake_images', run_id=23, num_pngs=1000); num_gpus = 1; desc = 'fake-images-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.generate_fake_images', run_id=23, grid_size=[15,8], num_pngs=10, image_shrink=4); num_gpus = 1; desc = 'fake-grids-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.generate_interpolation_video', run_id=23, grid_size=[1,1], duration_sec=60.0, smoothing_sec=1.0); num_gpus = 1; desc = 'interpolation-video-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.generate_training_video', run_id=23, duration_sec=20.0); num_gpus = 1; desc = 'training-video-' + str(train.run_id)
 
-#train = dict(func='scripts.evaluate_metrics', run_id=100, log='metric-swd-16k.txt', metrics=['swd'], num_images=16384, real_passes=2); run_desc = train['log'].split('.')[0] + '-' + str(train['run_id'])
-#train = dict(func='scripts.evaluate_metrics', run_id=100, log='metric-fid-50k.txt', metrics=['fid'], num_images=50000, real_passes=2); run_desc = train['log'].split('.')[0] + '-' + str(train['run_id'])
-#train = dict(func='scripts.evaluate_metrics', run_id=100, log='metric-is-50k.txt', metrics=['is'], num_images=50000, real_passes=1); run_desc = train['log'].split('.')[0] + '-' + str(train['run_id'])
-#train = dict(func='scripts.evaluate_metrics', run_id=100, log='metric-msssim-20k.txt', metrics=['msssim'], num_images=20000, real_passes=1); run_desc = train['log'].split('.')[0] + '-' + str(train['run_id'])
-
-#----------------------------------------------------------------------------
-# Number of GPUs to use.
-
-run_desc += '-1gpu'; num_gpus = 1
-#run_desc += '-2gpus'; num_gpus = 2
-#run_desc += '-4gpus'; num_gpus = 4
-#run_desc += '-8gpus'; num_gpus = 8
+#train = EasyDict(func='util_scripts.evaluate_metrics', run_id=23, log='metric-swd-16k.txt', metrics=['swd'], num_images=16384, real_passes=2); num_gpus = 1; desc = train.log.split('.')[0] + '-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.evaluate_metrics', run_id=23, log='metric-fid-10k.txt', metrics=['fid'], num_images=10000, real_passes=1); num_gpus = 1; desc = train.log.split('.')[0] + '-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.evaluate_metrics', run_id=23, log='metric-fid-50k.txt', metrics=['fid'], num_images=50000, real_passes=1); num_gpus = 1; desc = train.log.split('.')[0] + '-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.evaluate_metrics', run_id=23, log='metric-is-50k.txt', metrics=['is'], num_images=50000, real_passes=1); num_gpus = 1; desc = train.log.split('.')[0] + '-' + str(train.run_id)
+#train = EasyDict(func='util_scripts.evaluate_metrics', run_id=23, log='metric-msssim-20k.txt', metrics=['msssim'], num_images=20000, real_passes=1); num_gpus = 1; desc = train.log.split('.')[0] + '-' + str(train.run_id)
 
 #----------------------------------------------------------------------------

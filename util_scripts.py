@@ -19,6 +19,7 @@ import config
 import misc
 import tfutil
 import train
+import dataset
 
 #----------------------------------------------------------------------------
 # Generate random images or image grids using a previously trained network.
@@ -33,7 +34,7 @@ def generate_fake_images(run_id, snapshot=None, grid_size=[1,1], num_pngs=1, ima
     print('Loading network from "%s"...' % network_pkl)
     G, D, Gs = misc.load_network_pkl(run_id, snapshot)
 
-    result_subdir = misc.create_result_subdir(config.result_dir, config.run_desc)
+    result_subdir = misc.create_result_subdir(config.result_dir, config.desc)
     for png_idx in range(num_pngs):
         print('Generating png %d / %d...' % (png_idx, num_pngs))
         latents = misc.random_latents(np.prod(grid_size), Gs, random_state=random_state)
@@ -77,7 +78,7 @@ def generate_interpolation_video(run_id, snapshot=None, grid_size=[1,1], image_s
 
     # Generate video.
     import moviepy.editor # pip install moviepy
-    result_subdir = misc.create_result_subdir(config.result_dir, config.run_desc)
+    result_subdir = misc.create_result_subdir(config.result_dir, config.desc)
     moviepy.editor.VideoClip(make_frame, duration=duration_sec).write_videofile(os.path.join(result_subdir, mp4), fps=mp4_fps, codec='libx264', bitrate=mp4_bitrate)
     open(os.path.join(result_subdir, '_done.txt'), 'wt').close()
 
@@ -128,7 +129,7 @@ def generate_training_video(run_id, duration_sec=20.0, time_warp=1.5, mp4=None, 
 
     # Generate video.
     import moviepy.editor # pip install moviepy
-    result_subdir = misc.create_result_subdir(config.result_dir, config.run_desc)
+    result_subdir = misc.create_result_subdir(config.result_dir, config.desc)
     moviepy.editor.VideoClip(make_frame, duration=duration_sec).write_videofile(os.path.join(result_subdir, mp4), fps=mp4_fps, codec='libx264', bitrate=mp4_bitrate)
     open(os.path.join(result_subdir, '_done.txt'), 'wt').close()
 
@@ -136,7 +137,7 @@ def generate_training_video(run_id, duration_sec=20.0, time_warp=1.5, mp4=None, 
 # Evaluate one or more metrics for a previous training run.
 # To run, uncomment one of the appropriate lines in config.py and launch train.py.
 
-def evaluate_metrics(run_id, log, metrics, num_images, real_passes, minibatch_size=8):
+def evaluate_metrics(run_id, log, metrics, num_images, real_passes, minibatch_size=None):
     metric_class_names = {
         'swd':      'metrics.sliced_wasserstein.API',
         'fid':      'metrics.frechet_inception_distance.API',
@@ -152,8 +153,12 @@ def evaluate_metrics(run_id, log, metrics, num_images, real_passes, minibatch_si
     print('Logging output to', log_file)
     misc.set_output_log_file(log_file)
 
-    # Initialize dataset and metrics.
-    dataset_obj, mirror_augment = misc.load_dataset_for_previous_run(result_subdir, verbose=True, prefetch_items=minibatch_size*4, shuffle_items=0)
+    # Initialize dataset and select minibatch size.
+    dataset_obj, mirror_augment = misc.load_dataset_for_previous_run(result_subdir, verbose=True, shuffle_mb=0)
+    if minibatch_size is None:
+        minibatch_size = np.clip(8192 // dataset_obj.shape[1], 4, 256)
+
+    # Initialize metrics.
     metric_objs = []
     for name in metrics:
         class_name = metric_class_names.get(name, name)
@@ -164,7 +169,8 @@ def evaluate_metrics(run_id, log, metrics, num_images, real_passes, minibatch_si
         tfutil.init_uninited_vars()
         mode = 'warmup'
         obj.begin(mode)
-        obj.feed(mode, np.random.randint(0, 256, size=[minibatch_size]+image_shape, dtype=np.uint8))
+        for idx in range(10):
+            obj.feed(mode, np.random.randint(0, 256, size=[minibatch_size]+image_shape, dtype=np.uint8))
         obj.end(mode)
         metric_objs.append(obj)
 
