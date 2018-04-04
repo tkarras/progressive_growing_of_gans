@@ -1,15 +1,17 @@
-**Note about versions:** This branch contains the **original Theano-based implementation** that we used to produce the results in our paper. Unless you are looking to reproduce the exact same set of experiments, we strongly suggest checking out our [new TensorFlow-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/master) instead.
-
-## Progressive Growing of GANs for Improved Quality, Stability, and Variation
+## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>– Official Theano implementation of the ICLR 2018 paper</i>
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
-![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/master/representative_image_512x256.png)
+![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/original-theano-version/representative_image_512x256.png)
 <br>
 **Picture:** Two imaginary celebrities that were dreamed up by a random number generator.
 
 **Abstract:**
 <br>
 *We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively: starting from a low resolution, we add new layers that model increasingly fine details as training progresses. This both speeds the training up and greatly stabilizes it, allowing us to produce images of unprecedented quality, e.g., CelebA images at 1024². We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution, we construct a higher-quality version of the CelebA dataset.*
+
+## Note about versions
+
+This branch contains the **original Theano-based implementation** that we used to produce the results in our paper. Unless you are looking to reproduce the exact same set of experiments, we strongly suggest checking out our [new TensorFlow-based implementation](https://github.com/tkarras/progressive_growing_of_gans/tree/master) instead.
 
 ## Links
 
