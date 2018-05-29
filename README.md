@@ -2,7 +2,8 @@
 
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
-**For press and other inquiries, please contact Hector Marinez at [hmarinez@nvidia.com](mailto:hmarinez@nvidia.com)**
+* For business inquiries, please contact **[researchinquiries@nvidia.com](mailto:researchinquiries@nvidia.com)**
+* For press and other inquiries, please contact Hector Marinez at **[hmarinez@nvidia.com](mailto:hmarinez@nvidia.com)**
 
 ![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/master/representative_image_512x256.png)<br>
 **Picture:** Two imaginary celebrities that were dreamed up by a random number generator.
