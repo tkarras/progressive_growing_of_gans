@@ -1,7 +1,8 @@
 ## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>– Official Theano implementation of the ICLR 2018 paper</i>
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
-**For press and other inquiries, please contact Hector Marinez at [hmarinez@nvidia.com](mailto:hmarinez@nvidia.com)**
+* For business inquiries, please contact **[researchinquiries@nvidia.com](mailto:researchinquiries@nvidia.com)**
+* For press and other inquiries, please contact Hector Marinez at **[hmarinez@nvidia.com](mailto:hmarinez@nvidia.com)**
 
 ![Representative image](https://raw.githubusercontent.com/tkarras/progressive_growing_of_gans/original-theano-version/representative_image_512x256.png)
 <br>
