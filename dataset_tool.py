@@ -15,6 +15,7 @@ import traceback
 import numpy as np
 import tensorflow as tf
 import PIL.Image
+import cv2
 
 import tfutil
 import dataset
@@ -760,6 +761,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     resolution = img.shape[0]
     channels = img.shape[2] if img.ndim == 3 else 1
     if img.shape[1] != resolution:
+        img = cv2.resize(img, (shape[0], shape[0]))
         error("Input images must have the same width and height")
     if resolution != 2 ** int(np.floor(np.log2(resolution))):
         error("Input image resolution must be a power-of-two")
