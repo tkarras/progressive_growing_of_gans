@@ -762,7 +762,6 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     channels = img.shape[2] if img.ndim == 3 else 1
     if img.shape[1] != resolution:
         img = cv2.resize(img, (img.shape[0], img.shape[0]))
-        error("Input images must have the same width and height")
     if resolution != 2 ** int(np.floor(np.log2(resolution))):
         error("Input image resolution must be a power-of-two")
     if channels not in [1, 3]:
@@ -921,6 +920,19 @@ def execute_cmdline(argv):
     p.add_argument(
         "--cy", help="Center Y coordinate (default: 121)", type=int, default=121
     )
+    p = add_command(
+        "create_nabirds",
+        "Create dataset for nabirds.",
+        "create_nabirds datasets/nabirds ~/downloads/nabirds",
+    )
+    p.add_argument("tfrecord_dir", help="New dataset directory to be created")
+    p.add_argument("nabirds_dir", help="Directory containing nabirds")
+    p.add_argument(
+        "--cx", help="Center X coordinate (default: 89)", type=int, default=89
+    )
+    p.add_argument(
+        "--cy", help="Center Y coordinate (default: 121)", type=int, default=121
+    )
 
     p = add_command(
         "create_celebahq",
@@ -930,6 +942,25 @@ def execute_cmdline(argv):
     p.add_argument("tfrecord_dir", help="New dataset directory to be created")
     p.add_argument("celeba_dir", help="Directory containing CelebA")
     p.add_argument("delta_dir", help="Directory containing CelebA-HQ deltas")
+    p.add_argument(
+        "--num_threads",
+        help="Number of concurrent threads (default: 4)",
+        type=int,
+        default=4,
+    )
+    p.add_argument(
+        "--num_tasks",
+        help="Number of concurrent processing tasks (default: 100)",
+        type=int,
+        default=100,
+    )
+    p = add_command(
+        "create_nabirdshq",
+        "Create dataset for nabirds-HQ.",
+        "create_celebahq datasets/nabirdshq ~/downloads/nabirds ~/downloads/nabirds-hq-deltas",
+    )
+    p.add_argument("tfrecord_dir", help="New dataset directory to be created")
+    p.add_argument("delta_dir", help="Directory containing nabirds-HQ deltas")
     p.add_argument(
         "--num_threads",
         help="Number of concurrent threads (default: 4)",
