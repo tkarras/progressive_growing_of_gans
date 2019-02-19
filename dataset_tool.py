@@ -771,6 +771,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
                 2 ** int(np.ceil(np.log2(resolution))),
             ),
         )
+    print(img.shape)
     if channels not in [1, 3]:
         error("Input images must be stored as RGB or grayscale")
 
