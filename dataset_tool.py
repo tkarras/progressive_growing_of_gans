@@ -781,6 +781,18 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         )
         for idx in range(order.size):
             img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+            resolution = img.shape[0]
+            if img.shape[1] != resolution:
+                img = cv2.resize(img, (img.shape[0], img.shape[0]))
+            if resolution != 2 ** int(np.floor(np.log2(resolution))):
+                img = cv2.resize(
+                    img,
+                    (
+                        2 ** int(np.ceil(np.log2(resolution))),
+                        2 ** int(np.ceil(np.log2(resolution))),
+                    ),
+                )
+
             if channels == 1:
                 img = img[np.newaxis, :, :]  # HW => CHW
             else:
