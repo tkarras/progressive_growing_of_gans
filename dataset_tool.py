@@ -79,7 +79,6 @@ class TFRecordExporter:
         if self.shape is None:
             self.shape = img.shape
             self.resolution_log2 = int(np.log2(self.shape[1]))
-            print(self.shape)
             assert self.shape[0] in [1, 3]
             assert self.shape[1] == self.shape[2]
             assert self.shape[1] == 2 ** self.resolution_log2
@@ -759,19 +758,13 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         error("No input images found")
 
     img = np.asarray(PIL.Image.open(image_filenames[0]))
+    img = cv2.resize(img, (512, 512))
     resolution = img.shape[0]
     channels = img.shape[2] if img.ndim == 3 else 1
     if img.shape[1] != resolution:
-        img = cv2.resize(img, (img.shape[0], img.shape[0]))
+        error("Input images must have the same width and height")
     if resolution != 2 ** int(np.floor(np.log2(resolution))):
-        img = cv2.resize(
-            img,
-            (
-                2 ** int(np.ceil(np.log2(resolution))),
-                2 ** int(np.ceil(np.log2(resolution))),
-            ),
-        )
-    print(img.shape)
+        error("Input image resolution must be a power-of-two")
     if channels not in [1, 3]:
         error("Input images must be stored as RGB or grayscale")
 
@@ -781,18 +774,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         )
         for idx in range(order.size):
             img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
-            resolution = img.shape[0]
-            if img.shape[1] != resolution:
-                img = cv2.resize(img, (img.shape[0], img.shape[0]))
-            if resolution != 2 ** int(np.floor(np.log2(resolution))):
-                img = cv2.resize(
-                    img,
-                    (
-                        2 ** int(np.ceil(np.log2(resolution))),
-                        2 ** int(np.ceil(np.log2(resolution))),
-                    ),
-                )
-
+            img = cv2.resize(img, (512, 512))
             if channels == 1:
                 img = img[np.newaxis, :, :]  # HW => CHW
             else:
