@@ -975,20 +975,6 @@ def execute_cmdline(argv):
         "--cy", help="Center Y coordinate (default: 121)", type=int, default=121
     )
     p = add_command(
-        "create_nabirds",
-        "Create dataset for nabirds.",
-        "create_nabirds datasets/nabirds ~/downloads/nabirds",
-    )
-    p.add_argument("tfrecord_dir", help="New dataset directory to be created")
-    p.add_argument("nabirds_dir", help="Directory containing nabirds")
-    p.add_argument(
-        "--cx", help="Center X coordinate (default: 89)", type=int, default=89
-    )
-    p.add_argument(
-        "--cy", help="Center Y coordinate (default: 121)", type=int, default=121
-    )
-
-    p = add_command(
         "create_celebahq",
         "Create dataset for CelebA-HQ.",
         "create_celebahq datasets/celebahq ~/downloads/celeba ~/downloads/celeba-hq-deltas",
@@ -1008,26 +994,6 @@ def execute_cmdline(argv):
         type=int,
         default=100,
     )
-    p = add_command(
-        "create_nabirdshq",
-        "Create dataset for nabirds-HQ.",
-        "create_celebahq datasets/nabirdshq ~/downloads/nabirds ~/downloads/nabirds-hq-deltas",
-    )
-    p.add_argument("tfrecord_dir", help="New dataset directory to be created")
-    p.add_argument("delta_dir", help="Directory containing nabirds-HQ deltas")
-    p.add_argument(
-        "--num_threads",
-        help="Number of concurrent threads (default: 4)",
-        type=int,
-        default=4,
-    )
-    p.add_argument(
-        "--num_tasks",
-        help="Number of concurrent processing tasks (default: 100)",
-        type=int,
-        default=100,
-    )
-
     p = add_command(
         "create_from_images",
         "Create dataset from a directory full of images.",
