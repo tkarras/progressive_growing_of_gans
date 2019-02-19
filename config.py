@@ -27,7 +27,7 @@ class EasyDict(dict):
 # ----------------------------------------------------------------------------
 # Paths.
 
-data_dir = "datasets"
+data_dir = "tfnabirds"
 result_dir = "results"
 
 # ----------------------------------------------------------------------------
@@ -71,8 +71,8 @@ grid = EasyDict(
 )  # Options for train.setup_snapshot_image_grid().
 
 # Dataset (choose one).
-desc += "-celebahq"
-dataset = EasyDict(tfrecord_dir="celebahq")
+desc += "-nabirds"
+dataset = EasyDict(tfrecord_dir="tfnabirds")
 train.mirror_augment = True
 # desc += '-celeba';              dataset = EasyDict(tfrecord_dir='celeba'); train.mirror_augment = True
 # desc += '-cifar10';             dataset = EasyDict(tfrecord_dir='cifar10')
