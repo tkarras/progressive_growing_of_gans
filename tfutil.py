@@ -13,7 +13,7 @@ import imp
 import numpy as np
 from collections import OrderedDict
 import tensorflow as tf
-
+from tensorflow.python.ops.nccl_ops import all_sum
 # ----------------------------------------------------------------------------
 # Convenience.
 
@@ -400,7 +400,7 @@ class Optimizer:
                         if np.prod(
                             grad_shape
                         ):  # nccl does not support zero-sized tensors
-                            g = tf.contrib.nccl.all_sum(g)
+                            g = all_sum(g)
                         for dev, gg in zip(devices, g):
                             dev_grads[dev][var_idx] = (gg, dev_grads[dev][var_idx][1])
 
