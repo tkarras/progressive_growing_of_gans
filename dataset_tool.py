@@ -763,7 +763,13 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     if img.shape[1] != resolution:
         img = cv2.resize(img, (img.shape[0], img.shape[0]))
     if resolution != 2 ** int(np.floor(np.log2(resolution))):
-        error("Input image resolution must be a power-of-two")
+        img = cv2.resize(
+            img,
+            (
+                2 ** int(np.ceil(np.log2(resolution))),
+                2 ** int(np.ceil(np.log2(resolution))),
+            ),
+        )
     if channels not in [1, 3]:
         error("Input images must be stored as RGB or grayscale")
 
