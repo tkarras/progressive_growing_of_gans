@@ -751,6 +751,54 @@ def create_celebahq(tfrecord_dir, celeba_dir, delta_dir, num_threads=4, num_task
 # ----------------------------------------------------------------------------
 
 
+def process_func_image(idx):
+    img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+    img = cv2.resize(img, (512, 512))
+    if channels == 1:
+        img = img[np.newaxis, :, :]  # HW => CHW
+    else:
+        img = img.transpose(2, 0, 1)  # HWC => CHW
+
+    return img
+
+
+def process_items_concurrently(
+    self,
+    item_iterator,
+    process_func=lambda x: x,
+    pre_func=lambda x: x,
+    post_func=lambda x: x,
+    max_items_in_flight=None,
+):
+    if max_items_in_flight is None:
+        max_items_in_flight = self.num_threads * 4
+    assert max_items_in_flight >= 1
+    results = []
+    retire_idx = [0]
+
+    def task_func(prepared, idx):
+        return process_func(prepared)
+
+    def retire_result():
+        processed, (prepared, idx) = self.get_result(task_func)
+        results[idx] = processed
+        while retire_idx[0] < len(results) and results[retire_idx[0]] is not None:
+            yield post_func(results[retire_idx[0]])
+            results[retire_idx[0]] = None
+            retire_idx[0] += 1
+
+    for idx, item in enumerate(item_iterator):
+        prepared = pre_func(item)
+        results.append(None)
+        self.add_task(func=task_func, args=(prepared, idx))
+        while retire_idx[0] < idx - max_items_in_flight + 2:
+            for res in retire_result():
+                yield res
+    while retire_idx[0] < len(results):
+        for res in retire_result():
+            yield res
+
+
 def create_from_images(tfrecord_dir, image_dir, shuffle):
     print('Loading images from "%s"' % image_dir)
     image_filenames = sorted(glob.glob(os.path.join(image_dir, "*")))
@@ -767,19 +815,18 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         error("Input image resolution must be a power-of-two")
     if channels not in [1, 3]:
         error("Input images must be stored as RGB or grayscale")
-
+    num_tasks = 100
     with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
         order = (
             tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
         )
-        for idx in range(order.size):
-            img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
-            img = cv2.resize(img, (512, 512))
-            if channels == 1:
-                img = img[np.newaxis, :, :]  # HW => CHW
-            else:
-                img = img.transpose(2, 0, 1)  # HWC => CHW
-            tfr.add_image(img)
+        with ThreadPool(num_threads) as pool:
+            for img in pool.process_items_concurrently(
+                np.array(list(range(len(image_filenames))))[order].tolist(),
+                process_func=process_func_image,
+                max_items_in_flight=num_tasks,
+            ):
+                tfr.add_image(img)
 
 
 # ----------------------------------------------------------------------------
