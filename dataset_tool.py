@@ -90,31 +90,34 @@ class TFRecordExporter:
                     self.resolution_log2 - lod
                 )
                 self.tfr_writers.append(tf.python_io.TFRecordWriter(tfr_file, tfr_opt))
-        assert img.shape == self.shape
-        for lod, tfr_writer in enumerate(self.tfr_writers):
-            if lod:
-                img = img.astype(np.float32)
-                img = (
-                    img[:, 0::2, 0::2]
-                    + img[:, 0::2, 1::2]
-                    + img[:, 1::2, 0::2]
-                    + img[:, 1::2, 1::2]
-                ) * 0.25
-            quant = np.rint(img).clip(0, 255).astype(np.uint8)
-            ex = tf.train.Example(
-                features=tf.train.Features(
-                    feature={
-                        "shape": tf.train.Feature(
-                            int64_list=tf.train.Int64List(value=quant.shape)
-                        ),
-                        "data": tf.train.Feature(
-                            bytes_list=tf.train.BytesList(value=[quant.tostring()])
-                        ),
-                    }
+        if img.shape == self.shape:
+
+            for lod, tfr_writer in enumerate(self.tfr_writers):
+                if lod:
+                    img = img.astype(np.float32)
+                    img = (
+                        img[:, 0::2, 0::2]
+                        + img[:, 0::2, 1::2]
+                        + img[:, 1::2, 0::2]
+                        + img[:, 1::2, 1::2]
+                    ) * 0.25
+                quant = np.rint(img).clip(0, 255).astype(np.uint8)
+                ex = tf.train.Example(
+                    features=tf.train.Features(
+                        feature={
+                            "shape": tf.train.Feature(
+                                int64_list=tf.train.Int64List(value=quant.shape)
+                            ),
+                            "data": tf.train.Feature(
+                                bytes_list=tf.train.BytesList(value=[quant.tostring()])
+                            ),
+                        }
+                    )
                 )
-            )
-            tfr_writer.write(ex.SerializeToString())
-        self.cur_images += 1
+                tfr_writer.write(ex.SerializeToString())
+            self.cur_images += 1
+        else:
+            print(img.shape, self.shape)
 
     def add_labels(self, labels):
         if self.print_progress:
