@@ -816,6 +816,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     if channels not in [1, 3]:
         error("Input images must be stored as RGB or grayscale")
     num_tasks = 100
+    num_threads = 4
     with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
         order = (
             tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
