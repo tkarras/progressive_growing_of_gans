@@ -754,6 +754,7 @@ def create_celebahq(tfrecord_dir, celeba_dir, delta_dir, num_threads=4, num_task
 def process_func_image(file):
     img = np.asarray(PIL.Image.open(file))
     img = cv2.resize(img, (512, 512))
+    channels = img.shape[2] if img.ndim == 3 else 1
     if channels == 1:
         img = img[np.newaxis, :, :]  # HW => CHW
     else:
