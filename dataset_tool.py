@@ -751,8 +751,8 @@ def create_celebahq(tfrecord_dir, celeba_dir, delta_dir, num_threads=4, num_task
 # ----------------------------------------------------------------------------
 
 
-def process_func_image(idx):
-    img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+def process_func_image(file):
+    img = np.asarray(PIL.Image.open(file))
     img = cv2.resize(img, (512, 512))
     if channels == 1:
         img = img[np.newaxis, :, :]  # HW => CHW
@@ -823,7 +823,7 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
         )
         with ThreadPool(num_threads) as pool:
             for img in pool.process_items_concurrently(
-                np.array(list(range(len(image_filenames))))[order].tolist(),
+                np.array(image_filenames)[order].tolist(),
                 process_func=process_func_image,
                 max_items_in_flight=num_tasks,
             ):
