@@ -18,8 +18,8 @@ class EasyDict(dict):
 #----------------------------------------------------------------------------
 # Paths.
 
-data_dir = 'datasets'
-result_dir = 'results'
+data_dir = '/content/drive/My Drive/Effusion'
+result_dir = '/content/drive/My Drive/Effusion'
 
 #----------------------------------------------------------------------------
 # TensorFlow options.
