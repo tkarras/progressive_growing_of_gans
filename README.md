@@ -44,12 +44,12 @@ The main differences are summarized in the following table:
 | Multi-GPU support                 | Yes                                           | No                        |
 | FP16 mixed-precision support      | Yes                                           | No                        |
 | Performance                       | High                                          | Low                       |
-| Training time for CelebA-HQ       | 2 days (8 GPUs)<br>2 weeks (1 GPU)            | 1&mdash;2 months          |
-| Repro CelebA-HQ results           | Yes &mdash; very close                        | Yes &mdash; identical     |
-| Repro LSUN results                | Yes &mdash; very close                        | Yes &mdash; identical     |
-| Repro CIFAR-10 results            | No                                            | Yes &mdash; identical     |
-| Repro MNIST mode recovery         | No                                            | Yes &mdash; identical     |
-| Repro ablation study (Table 1)    | No                                            | Yes &mdash; identical     |
+| Training time for CelebA-HQ       | 2 days (8 GPUs)<br>2 weeks (1 GPU)            | 1&ndash;2 months          |
+| Repro CelebA-HQ results           | Yes &ndash; very close                        | Yes &ndash; identical     |
+| Repro LSUN results                | Yes &ndash; very close                        | Yes &ndash; identical     |
+| Repro CIFAR-10 results            | No                                            | Yes &ndash; identical     |
+| Repro MNIST mode recovery         | No                                            | Yes &ndash; identical     |
+| Repro ablation study (Table 1)    | No                                            | Yes &ndash; identical     |
 | Dataset format                    | TFRecords                                     | HDF5                      |
 | Backwards compatibility           | Can import networks<br>trained with Theano    | N/A                       |
 | Code quality                      | Reasonable                                    | Somewhat messy            |
