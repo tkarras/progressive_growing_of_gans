@@ -1,4 +1,4 @@
-## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>– Official TensorFlow implementation of the ICLR 2018 paper</i>
+## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>ï¿½ Official TensorFlow implementation of the ICLR 2018 paper</i>
 
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
@@ -9,7 +9,9 @@
 **Picture:** Two imaginary celebrities that were dreamed up by a random number generator.
 
 **Abstract:**<br>
-*We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively: starting from a low resolution, we add new layers that model increasingly fine details as training progresses. This both speeds the training up and greatly stabilizes it, allowing us to produce images of unprecedented quality, e.g., CelebA images at 1024². We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution, we construct a higher-quality version of the CelebA dataset.*
+*We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively: starting from a low resolution, we add new layers that model increasingly fine details as training progresses. This both speeds the training up and greatly stabilizes it, allowing us to produce images of unprecedented quality, e.g., CelebA images at 1024ï¿½. We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution, we construct a higher-quality version of the CelebA dataset.*
+
+**&#9733;&#9733;&#9733; NEW: [StyleGAN2-ADA-PyTorch](https://github.com/NVlabs/stylegan2-ada-pytorch) is now available; see the full list of versions [here](https://nvlabs.github.io/stylegan2/versions.html) &#9733;&#9733;&#9733;**
 
 ## Resources
 
@@ -32,7 +34,7 @@ All the material, including source code, is made freely available for non-commer
 
 ## Versions
 
-There are two different versions of the source code. The *TensorFlow version* is newer and more polished, and we generally recommend it as a starting point if you are looking to experiment with our technique, build upon it, or apply it to novel datasets. The *original Theano version*, on the other hand, is what we used to produce all the results shown in our paper. We recommend using it if – and only if – you are looking to reproduce our exact results for benchmark datasets like CIFAR-10, MNIST-RGB, and CelebA.
+There are two different versions of the source code. The *TensorFlow version* is newer and more polished, and we generally recommend it as a starting point if you are looking to experiment with our technique, build upon it, or apply it to novel datasets. The *original Theano version*, on the other hand, is what we used to produce all the results shown in our paper. We recommend using it if ï¿½ and only if ï¿½ you are looking to reproduce our exact results for benchmark datasets like CIFAR-10, MNIST-RGB, and CelebA.
 
 The main differences are summarized in the following table:
 
@@ -42,12 +44,12 @@ The main differences are summarized in the following table:
 | Multi-GPU support                 | Yes                                           | No                        |
 | FP16 mixed-precision support      | Yes                                           | No                        |
 | Performance                       | High                                          | Low                       |
-| Training time for CelebA-HQ       | 2 days (8 GPUs)<br>2 weeks (1 GPU)            | 1–2 months                |
-| Repro CelebA-HQ results           | Yes – very close                              | Yes – identical           |
-| Repro LSUN results                | Yes – very close                              | Yes – identical           |
-| Repro CIFAR-10 results            | No                                            | Yes – identical           |
-| Repro MNIST mode recovery         | No                                            | Yes – identical           |
-| Repro ablation study (Table 1)    | No                                            | Yes – identical           |
+| Training time for CelebA-HQ       | 2 days (8 GPUs)<br>2 weeks (1 GPU)            | 1ï¿½2 months                |
+| Repro CelebA-HQ results           | Yes ï¿½ very close                              | Yes ï¿½ identical           |
+| Repro LSUN results                | Yes ï¿½ very close                              | Yes ï¿½ identical           |
+| Repro CIFAR-10 results            | No                                            | Yes ï¿½ identical           |
+| Repro MNIST mode recovery         | No                                            | Yes ï¿½ identical           |
+| Repro ablation study (Table 1)    | No                                            | Yes ï¿½ identical           |
 | Dataset format                    | TFRecords                                     | HDF5                      |
 | Backwards compatibility           | Can import networks<br>trained with Theano    | N/A                       |
 | Code quality                      | Reasonable                                    | Somewhat messy            |
@@ -89,7 +91,7 @@ Once you have imported the networks, you can call `Gs.run()` to produce a set of
 2. Download [`import_example.py`](https://drive.google.com/open?id=1xZul7DwqqJoe5OCuKHw6fQVeQZNIMSuF) from [`networks/tensorflow-version/example_import_script`](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_)
 3. Download [`karras2018iclr-celebahq-1024x1024.pkl`](https://drive.google.com/open?id=188K19ucknC6wg1R6jbuPEhTq9zoufOx4) from [`networks/tensorflow-version`](https://drive.google.com/open?id=15hvzxt_XxuokSmj0uO4xxMTMWVc0cIMU) and place it in the same directory as the script.
 5. Run the script with `python import_example.py`
-6. If everything goes well, the script should generate 10 PNG images (`img0.png` – `img9.png`) that match the ones found in [`networks/tensorflow-version/example_import_script`](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_) exactly.
+6. If everything goes well, the script should generate 10 PNG images (`img0.png` ï¿½ `img9.png`) that match the ones found in [`networks/tensorflow-version/example_import_script`](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_) exactly.
 
 ## Preparing datasets for training
 
@@ -131,7 +133,7 @@ drwxrwxr-x 10 user user        62 Apr  3 15:10 ..
 
 The ```create_*``` commands take the standard version of a given dataset as input and produce the corresponding `*.tfrecords` files as output. Additionally, the ```create_celebahq``` command requires a set of data files representing deltas with respect to the original CelebA dataset. These deltas (27.6GB) can be downloaded from [`datasets/celeba-hq-deltas`](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
 
-**Note about module versions**: Some of the dataset commands require specific versions of Python modules and system libraries (e.g. pillow, libjpeg), and they will give an error if the versions do not match. Please heed the error messages – there is **no way** to get the commands to work other than installing these specific versions.
+**Note about module versions**: Some of the dataset commands require specific versions of Python modules and system libraries (e.g. pillow, libjpeg), and they will give an error if the versions do not match. Please heed the error messages ï¿½ there is **no way** to get the commands to work other than installing these specific versions.
 
 ## Training networks
 
@@ -171,4 +173,4 @@ Training results can be analyzed in several ways:
   * Suppose you have an ongoing training run titled `010-pgan-celebahq-preset-v1-1gpu-fp32`, and you want to generate a video of random interpolations for the latest snapshot.
   * Uncomment the `generate_interpolation_video` line in `config.py`, replace `run_id=10`, and run `python train.py`
   * The script will automatically locate the latest network snapshot and create a new result directory containing a single MP4 file.
-* **Quality metrics**: Similar to the previous example, `config.py` also contains pre-defined configs to compute various quality metrics (Sliced Wasserstein distance, Fréchet inception distance, etc.) for an existing training run. The metrics are computed for each network snapshot in succession and stored in `metric-*.txt` in the original result directory.
+* **Quality metrics**: Similar to the previous example, `config.py` also contains pre-defined configs to compute various quality metrics (Sliced Wasserstein distance, Frï¿½chet inception distance, etc.) for an existing training run. The metrics are computed for each network snapshot in succession and stored in `metric-*.txt` in the original result directory.
