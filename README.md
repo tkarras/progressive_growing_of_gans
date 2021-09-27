@@ -1,4 +1,4 @@
-## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>– Official Theano implementation of the ICLR 2018 paper</i>
+## Progressive Growing of GANs for Improved Quality, Stability, and Variation<br><i>&mdash; Official Theano implementation of the ICLR 2018 paper</i>
 **Tero Karras** (NVIDIA), **Timo Aila** (NVIDIA), **Samuli Laine** (NVIDIA), **Jaakko Lehtinen** (NVIDIA and Aalto University)
 
 * For business inquiries, please contact **[researchinquiries@nvidia.com](mailto:researchinquiries@nvidia.com)**
@@ -10,7 +10,7 @@
 
 **Abstract:**
 <br>
-*We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively: starting from a low resolution, we add new layers that model increasingly fine details as training progresses. This both speeds the training up and greatly stabilizes it, allowing us to produce images of unprecedented quality, e.g., CelebA images at 1024². We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution, we construct a higher-quality version of the CelebA dataset.*
+*We describe a new training methodology for generative adversarial networks. The key idea is to grow both the generator and discriminator progressively: starting from a low resolution, we add new layers that model increasingly fine details as training progresses. This both speeds the training up and greatly stabilizes it, allowing us to produce images of unprecedented quality, e.g., CelebA images at 1024<sup>2</sup>. We also propose a simple way to increase the variation in generated images, and achieve a record inception score of 8.80 in unsupervised CIFAR10. Additionally, we describe several implementation details that are important for discouraging unhealthy competition between the generator and discriminator. Finally, we suggest a new metric for evaluating GAN results, both in terms of image quality and variation. As an additional contribution, we construct a higher-quality version of the CelebA dataset.*
 
 ## Note about versions
 
@@ -21,7 +21,7 @@ This branch contains the **original Theano-based implementation** that we used t
 * [Paper (NVIDIA research)](http://research.nvidia.com/publication/2017-10_Progressive-Growing-of)
 * [Paper (arXiv)](http://arxiv.org/abs/1710.10196)
 * [Result video (YouTube)](https://youtu.be/G06dEcZ-QTg)
-* [Pre-trained networks (Google Drive)](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
+* [Pre-trained networks (Google Drive)](https://drive.google.com/drive/folders/0B4qLcYyJmiz0NHFULTdYc05lX0U?resourcekey=0-3SXNvbPCamZoHWDlmdJToQ&usp=sharing)
 
 ## Datasets
 
@@ -45,7 +45,7 @@ usage: h5tool.py [-h] <command> ...
 Type "h5tool.py <command> -h" for more information.
 ```
 
-The ```create_*``` commands take the original dataset as input and produce the corresponding HDF5 file as output. Additionally, the ```create_celeba_hq``` command requires a set of data files representing deltas from the original CelebA dataset. The deltas can be downloaded from [Google Drive (27.6GB)](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
+The ```create_*``` commands take the original dataset as input and produce the corresponding HDF5 file as output. Additionally, the ```create_celeba_hq``` command requires a set of data files representing deltas from the original CelebA dataset. The deltas can be downloaded from [Google Drive (27.6GB)](https://drive.google.com/drive/folders/0B4qLcYyJmiz0TXY1NG02bzZVRGs?resourcekey=0-arAVTUfW9KRhN-irJchVKQ&usp=sharing).
 
 ## License
 
