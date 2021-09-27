@@ -18,17 +18,17 @@
 * [Paper (NVIDIA research)](http://research.nvidia.com/publication/2017-10_Progressive-Growing-of)
 * [Paper (arXiv)](http://arxiv.org/abs/1710.10196)
 * [Result video (YouTube)](https://youtu.be/G06dEcZ-QTg)
-* [Additional material (Google Drive)](https://drive.google.com/open?id=0B4qLcYyJmiz0NHFULTdYc05lX0U)
-  * [ICLR 2018 poster (`karras2018iclr-poster.pdf`)](https://drive.google.com/open?id=1ilUVoIejsvG04G0PzFNVn3U3TjSSyHGu)
-  * [ICLR 2018 slides (`karras2018iclr-slides.pptx`)](https://drive.google.com/open?id=1jYlrX4DgTs2VAfRcyl3pcNI4ONkBg3-g)
-  * [Representative images (`images/representative-images`)](https://drive.google.com/open?id=0B4qLcYyJmiz0UE9zVHduWFVORlk)
-  * [High-quality video clips (`videos/high-quality-video-clips`)](https://drive.google.com/open?id=1gQu3O8ZhC-nko8wLFgcNqcwMnRYL_z85)
-  * [Huge collection of non-curated images for each dataset (`images/100k-generated-images`)](https://drive.google.com/open?id=1j6uZ_a6zci0HyKZdpDq9kSa8VihtEPCp)
-  * [Extensive video of random interpolations for each dataset (`videos/one-hour-of-random-interpolations`)](https://drive.google.com/open?id=1gAb3oqpaQFHZTwPUXHPIfBIP8eIeWNrI)
-  * [Pre-trained networks (`networks/tensorflow-version`)](https://drive.google.com/open?id=15hvzxt_XxuokSmj0uO4xxMTMWVc0cIMU)
-  * [Minimal example script for importing the pre-trained networks (`networks/tensorflow-version/example_import_script`)](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_)
-  * [Data files needed to reconstruct the CelebA-HQ dataset (`datasets/celeba-hq-deltas`)](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs)
-  * [Example training logs and progress snapshots (`networks/tensorflow-version/example_training_runs`)](https://drive.google.com/open?id=1A9SKoQ7Xu2fqK22GHdMw8LZTh6qLvR7H)
+* [Additional material (Google Drive)](https://drive.google.com/drive/folders/0B4qLcYyJmiz0NHFULTdYc05lX0U?resourcekey=0-3SXNvbPCamZoHWDlmdJToQ&usp=sharing)
+  * [ICLR 2018 poster (`karras2018iclr-poster.pdf`)](https://drive.google.com/file/d/1ilUVoIejsvG04G0PzFNVn3U3TjSSyHGu/view?usp=sharing)
+  * [ICLR 2018 slides (`karras2018iclr-slides.pptx`)](https://docs.google.com/presentation/d/1jYlrX4DgTs2VAfRcyl3pcNI4ONkBg3-g/edit?usp=sharing&ouid=110484684358930488604&rtpof=true&sd=true)
+  * [Representative images (`images/representative-images`)](https://drive.google.com/drive/folders/0B4qLcYyJmiz0UE9zVHduWFVORlk?resourcekey=0--AwMdHXucZnuVhMBlKxMSQ&usp=sharing)
+  * [High-quality video clips (`videos/high-quality-video-clips`)](https://drive.google.com/drive/folders/1gQu3O8ZhC-nko8wLFgcNqcwMnRYL_z85?usp=sharing)
+  * [Huge collection of non-curated images for each dataset (`images/100k-generated-images`)](https://drive.google.com/drive/folders/1j6uZ_a6zci0HyKZdpDq9kSa8VihtEPCp?usp=sharing)
+  * [Extensive video of random interpolations for each dataset (`videos/one-hour-of-random-interpolations`)](https://drive.google.com/drive/folders/1gAb3oqpaQFHZTwPUXHPIfBIP8eIeWNrI?usp=sharing)
+  * [Pre-trained networks (`networks/tensorflow-version`)](https://drive.google.com/drive/folders/15hvzxt_XxuokSmj0uO4xxMTMWVc0cIMU?usp=sharing)
+  * [Minimal example script for importing the pre-trained networks (`networks/tensorflow-version/example_import_script`)](https://drive.google.com/drive/folders/1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_?usp=sharing)
+  * [Data files needed to reconstruct the CelebA-HQ dataset (`datasets/celeba-hq-deltas`)](https://drive.google.com/drive/folders/0B4qLcYyJmiz0TXY1NG02bzZVRGs?resourcekey=0-arAVTUfW9KRhN-irJchVKQ&usp=sharing)
+  * [Example training logs and progress snapshots (`networks/tensorflow-version/example_training_runs`)](https://drive.google.com/drive/folders/1A9SKoQ7Xu2fqK22GHdMw8LZTh6qLvR7H?usp=sharing)
 
 All the material, including source code, is made freely available for non-commercial use under the Creative Commons [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode) license. Feel free to use any of the material in your own work, as long as you give us appropriate credit by mentioning the title and author list of our paper.
 
@@ -53,7 +53,6 @@ The main differences are summarized in the following table:
 | Dataset format                    | TFRecords                                     | HDF5                      |
 | Backwards compatibility           | Can import networks<br>trained with Theano    | N/A                       |
 | Code quality                      | Reasonable                                    | Somewhat messy            |
-| Code status                       | In active use                                 | No longer maintained      |
 
 ## System requirements
 
@@ -88,10 +87,10 @@ Once you have imported the networks, you can call `Gs.run()` to produce a set of
 
 1. Pull the Progressive GAN code repository and add it to your PYTHONPATH environment variable.
 2. Install the required Python packages with `pip install -r requirements-pip.txt`
-2. Download [`import_example.py`](https://drive.google.com/open?id=1xZul7DwqqJoe5OCuKHw6fQVeQZNIMSuF) from [`networks/tensorflow-version/example_import_script`](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_)
-3. Download [`karras2018iclr-celebahq-1024x1024.pkl`](https://drive.google.com/open?id=188K19ucknC6wg1R6jbuPEhTq9zoufOx4) from [`networks/tensorflow-version`](https://drive.google.com/open?id=15hvzxt_XxuokSmj0uO4xxMTMWVc0cIMU) and place it in the same directory as the script.
+2. Download [`import_example.py`](https://drive.google.com/file/d/1xZul7DwqqJoe5OCuKHw6fQVeQZNIMSuF/view?usp=sharing) from [`networks/tensorflow-version/example_import_script`](https://drive.google.com/drive/folders/1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_?usp=sharing)
+3. Download [`karras2018iclr-celebahq-1024x1024.pkl`](https://drive.google.com/file/d/188K19ucknC6wg1R6jbuPEhTq9zoufOx4/view?usp=sharing) from [`networks/tensorflow-version`](https://drive.google.com/drive/folders/15hvzxt_XxuokSmj0uO4xxMTMWVc0cIMU?usp=sharing) and place it in the same directory as the script.
 5. Run the script with `python import_example.py`
-6. If everything goes well, the script should generate 10 PNG images (`img0.png`&ndash;`img9.png`) that match the ones found in [`networks/tensorflow-version/example_import_script`](https://drive.google.com/open?id=1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_) exactly.
+6. If everything goes well, the script should generate 10 PNG images (`img0.png`&ndash;`img9.png`) that match the ones found in [`networks/tensorflow-version/example_import_script`](https://drive.google.com/drive/folders/1A79qKDTFp6pExe4gTSgBsEOkxwa2oes_?usp=sharing) exactly.
 
 ## Preparing datasets for training
 
@@ -131,7 +130,7 @@ drwxrwxr-x 10 user user        62 Apr  3 15:10 ..
 -rw-r--r--  1 user user   2000080 Feb 19 13:17 cifar10-rxx.labels
 ```
 
-The ```create_*``` commands take the standard version of a given dataset as input and produce the corresponding `*.tfrecords` files as output. Additionally, the ```create_celebahq``` command requires a set of data files representing deltas with respect to the original CelebA dataset. These deltas (27.6GB) can be downloaded from [`datasets/celeba-hq-deltas`](https://drive.google.com/open?id=0B4qLcYyJmiz0TXY1NG02bzZVRGs).
+The ```create_*``` commands take the standard version of a given dataset as input and produce the corresponding `*.tfrecords` files as output. Additionally, the ```create_celebahq``` command requires a set of data files representing deltas with respect to the original CelebA dataset. These deltas (27.6GB) can be downloaded from [`datasets/celeba-hq-deltas`](https://drive.google.com/drive/folders/0B4qLcYyJmiz0TXY1NG02bzZVRGs?resourcekey=0-arAVTUfW9KRhN-irJchVKQ&usp=sharing).
 
 **Note about module versions**: Some of the dataset commands require specific versions of Python modules and system libraries (e.g. pillow, libjpeg), and they will give an error if the versions do not match. Please heed the error messages &mdash; there is **no way** to get the commands to work other than installing these specific versions.
 
@@ -152,7 +151,7 @@ By default, `config.py` is configured to train a 1024x1024 network for CelebA-HQ
 * `preset-v2-4gpus`: Optimized config for 4 GPUs. Takes about 3 days on 4xV100.
 * `preset-v2-8gpus`: Optimized config for 8 GPUs. Takes about 2 days on 8xV100.
 
-For reference, the expected output of each configuration preset for CelebA-HQ can be found in [`networks/tensorflow-version/example_training_runs`](https://drive.google.com/open?id=1A9SKoQ7Xu2fqK22GHdMw8LZTh6qLvR7H)
+For reference, the expected output of each configuration preset for CelebA-HQ can be found in [`networks/tensorflow-version/example_training_runs`](https://drive.google.com/drive/folders/1A9SKoQ7Xu2fqK22GHdMw8LZTh6qLvR7H?usp=sharing)
 
 Other noteworthy config options:
 
