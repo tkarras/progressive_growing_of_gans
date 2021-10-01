@@ -1,0 +1,5 @@
+git+https://github.com/Theano/Theano.git
+git+https://github.com/Lasagne/Lasagne.git
+Pillow
+h5py
+scipy
