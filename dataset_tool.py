@@ -593,7 +593,8 @@ def create_celebahq(tfrecord_dir, celeba_dir, delta_dir, num_threads=4, num_task
             for img in pool.process_items_concurrently(indices[order].tolist(), process_func=process_func, max_items_in_flight=num_tasks):
                 tfr.add_image(img)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def create_from_images(tfrecord_dir, image_dir, shuffle):
     print('Loading images from "%s"' % image_dir)
@@ -614,14 +615,18 @@ def create_from_images(tfrecord_dir, image_dir, shuffle):
     with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
         order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
         for idx in range(order.size):
-            img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
-            if channels == 1:
-                img = img[np.newaxis, :, :] # HW => CHW
-            else:
-                img = img.transpose(2, 0, 1) # HWC => CHW
-            tfr.add_image(img)
-
-#----------------------------------------------------------------------------
+            try:
+                print(image_filenames[order[idx]])
+                img = np.asarray(PIL.Image.open(image_filenames[order[idx]]))
+                if channels == 1:
+                    img = img[np.newaxis, :, :] # HW => CHW
+                else:
+                    img = img.transpose(2, 0, 1) # HWC => CHW
+                tfr.add_image(img)
+            except:
+                print(image_filenames[order[idx]], 'failed to add to database')
+                pass
+# ----------------------------------------------------------------------------
 
 def create_from_hdf5(tfrecord_dir, hdf5_filename, shuffle):
     print('Loading HDF5 archive from "%s"' % hdf5_filename)
