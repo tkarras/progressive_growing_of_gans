@@ -176,7 +176,7 @@ def finalize_autosummaries():
 def _create_autosummary_var(name, value_expr):
     assert not _autosummary_finalized
     v = tf.cast(value_expr, tf.float32)
-    if v.shape.ndims is 0:
+    if v.shape.ndims == 0:
         v = [v, np.float32(1.0)]
     elif v.shape.ndims is 1:
         v = [tf.reduce_sum(v), tf.cast(tf.shape(v)[0], tf.float32)]
